@@ -40,8 +40,8 @@ public class PointManager : MonoBehaviour {
 	}
 	IEnumerator Start()
 	{
-		yield return StartCoroutine(Generate());
 		cam = Camera.main.transform;
+		yield return StartCoroutine(Generate());
 	}
 
 	public static float TornadoSway(float y) {

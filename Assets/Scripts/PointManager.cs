@@ -211,13 +211,10 @@ public class PointManager : MonoBehaviour {
 		var entityManager = World.Active.EntityManager;
 		foreach (var b in barsList)
 		{
-			ComponentType[] ct = new ComponentType[7]
+			ComponentType[] ct = 
 			{
 				typeof(DotsConversion.Bar), 
-				typeof(DotsConversion.BarThickness), 
-				typeof(Translation),
-				typeof(Scale),
-				typeof(Rotation),
+				typeof(DotsConversion.BarThickness),
 				typeof(LocalToWorld), 
 				typeof(RenderMesh)
 			};

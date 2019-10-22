@@ -6,7 +6,7 @@ namespace DotsConversion
 	[Serializable]
 	public struct TornadoParticle : IComponentData
 	{
-		// int tornadoIndex;
+		public int tornadoId;
 		public float RadiusMultiplier;
 	}
 }

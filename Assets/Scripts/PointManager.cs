@@ -223,7 +223,9 @@ public class PointManager : MonoBehaviour {
 			};
 			
 			var e = entityManager.CreateEntity(ct);
-
+			if ( b.point1.anchor || b.point2.anchor) 
+				entityManager.AddComponentData(e, new BarAnchor());
+			
 			float3 p1 = new float3(b.point1.x, b.point1.y, b.point1.z);
 			float3 p2 = new float3(b.point2.x, b.point2.y, b.point2.z);
 			var dotsBar = new DotsConversion.Bar();

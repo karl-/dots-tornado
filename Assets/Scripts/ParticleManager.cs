@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class ParticleManager : MonoBehaviour {
+	// const
 	public Mesh particleMesh;
 	public Material particleMaterial;
 	public float spinRate;
 	public float upwardSpeed;
+	
 	Vector3[] points;
 	Matrix4x4[] matrices;
 	MaterialPropertyBlock matProps;

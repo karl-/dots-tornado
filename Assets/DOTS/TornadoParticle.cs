@@ -1,9 +1,15 @@
+using System;
 using Unity.Entities;
 
 namespace DotsConversion
 {
-	public class TornadoParticle : IComponentData
+	[Serializable]
+	public struct TornadoParticleInitTag : IComponentData { }
+
+	[Serializable]
+	public struct TornadoParticle : IComponentData
 	{
 		// int tornadoIndex;
+		public float RadiusMultiplier;
 	}
 }

@@ -24,7 +24,6 @@ public class TornadoParticleSpawner : MonoBehaviour
 
         EntityArchetype particleArchetype = entityManager.CreateArchetype(
             typeof(TornadoParticle),
-            typeof(TornadoParticleInitTag),
             typeof(Translation),
             typeof(Scale),
             typeof(RenderMesh),

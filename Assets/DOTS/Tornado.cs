@@ -23,6 +23,10 @@ namespace DotsConversion.Authoring
         public float upwardSpeed = 6f;
         public Vector2 particleSizeRange = new Vector2(.2f, .7f);
 
+        [Header("Particles")]
+        public Mesh mesh;
+        public Material material;
+
         public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
         {
             dstManager.AddComponent<DotsConversion.Tornado>(entity);
@@ -37,7 +41,7 @@ namespace DotsConversion.Authoring
             InstantiateParticles(particleCount, radius, height, particleSizeRange);
         }
 
-        static void InstantiateParticles(int count, float radius, float height, float2 size)
+        void InstantiateParticles(int count, float radius, float height, float2 size)
         {
             EntityManager entityManager = World.Active.EntityManager;
 
@@ -45,12 +49,8 @@ namespace DotsConversion.Authoring
                 typeof(TornadoParticle),
                 typeof(Translation),
                 typeof(Scale),
-                typeof(RenderMesh),
+                typeof(MeshRenderer),
                 typeof(LocalToWorld));
-
-            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            Mesh mesh = cube.GetComponent<MeshFilter>().sharedMesh;
-            Material material = cube.GetComponent<MeshRenderer>().sharedMaterial;
 
             for (int i = 1; i < count; i++)
             {
@@ -63,7 +63,7 @@ namespace DotsConversion.Authoring
                 entityManager.SetComponentData(entity, new TornadoParticle() { RadiusMultiplier = Random.value });
                 entityManager.SetComponentData(entity, new Translation() { Value = position });
                 entityManager.SetComponentData(entity, new Scale() { Value = Random.Range(size.x, size.y) });
-                entityManager.SetSharedComponentData(entity, new RenderMesh() { mesh = mesh, material = material });
+                entityManager.SetSharedComponentData(entity, new MeshRenderer() { mesh = mesh, material = material });
             }
         }
     }

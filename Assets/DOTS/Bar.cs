@@ -13,6 +13,10 @@ namespace DotsConversion
 	{
 		public Point a, b;
 	}
-	public struct BarThickness : IComponentData { }
+
+	public struct BarThickness : IComponentData
+	{
+		public float thickness;
+	}
 	public struct BarAnchor : IComponentData { }
 }

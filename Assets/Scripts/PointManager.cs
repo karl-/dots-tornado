@@ -1,7 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using DotsConversion;
+using Unity.Entities;
 using UnityEngine;
-
+using Unity.Mathematics;
+using Unity.Rendering;
+using Unity.Transforms;
+using UnityEngine.Rendering;
+using Random = UnityEngine.Random;
 public class PointManager : MonoBehaviour {
 	public Material barMaterial;
 	public Mesh barMesh;
@@ -60,8 +66,8 @@ public class PointManager : MonoBehaviour {
 		for (int i = 0; i < 35; i++)
 		{
 			// In random positions along the X and Z axes
-			int height = Random.Range(4, 12);
-			Vector3 pos = new Vector3(Random.Range(-45f, 45f), 0f, Random.Range(-45f, 45f));
+			int height = UnityEngine.Random.Range(4, 12);
+			Vector3 pos = new Vector3(UnityEngine.Random.Range(-45f, 45f), 0f, UnityEngine.Random.Range(-45f, 45f));
 			float spacing = 2f;
 
 			// Buildings are between 4 and 12 blocks tall
@@ -114,7 +120,7 @@ public class PointManager : MonoBehaviour {
 		// In addition to the buildings, also generate 300 connected points
 		for (int i=0;i<600;i++)
 		{
-			Vector3 pos = new Vector3(Random.Range(-55f,55f),0f,Random.Range(-55f,55f));
+			Vector3 pos = new Vector3(UnityEngine.Random.Range(-55f,55f),0f,UnityEngine.Random.Range(-55f,55f));
 			Point point = new Point();
 			point.x = pos.x + Random.Range(-.2f,-.1f);
 			point.y = pos.y+Random.Range(0f,3f);
@@ -200,6 +206,58 @@ public class PointManager : MonoBehaviour {
 				block.SetVectorArray("_Color",colors);
 				matProps[i / instancesPerBatch] = block;
 			}
+		}
+		
+		var entityManager = World.Active.EntityManager;
+		foreach (var b in barsList)
+		{
+			ComponentType[] ct = new ComponentType[7]
+			{
+				typeof(DotsConversion.Bar), 
+				typeof(DotsConversion.BarThickness), 
+				typeof(Translation),
+				typeof(Scale),
+				typeof(Rotation),
+				typeof(LocalToWorld), 
+				typeof(RenderMesh)
+			};
+			
+			var e = entityManager.CreateEntity(ct);
+
+			float3 p1 = new float3(b.point1.x, b.point1.y, b.point1.z);
+			float3 p2 = new float3(b.point2.x, b.point2.y, b.point2.z);
+			var dotsBar = new DotsConversion.Bar();
+			dotsBar.a.position = p1;
+			dotsBar.b.position = p2;
+			dotsBar.a.neighborCount = b.point1.neighborCount;
+			dotsBar.b.neighborCount = b.point2.neighborCount;
+			
+			entityManager.SetComponentData(e, dotsBar);
+			var dotsBarThickness = new DotsConversion.BarThickness();
+			dotsBarThickness.thickness = b.thickness;
+			entityManager.SetComponentData(e, dotsBarThickness);
+			
+			
+			var lw = entityManager.GetComponentData<LocalToWorld>(e);
+
+			entityManager.SetComponentData(e, lw);
+			var tr = entityManager.GetComponentData<Translation>(e);
+			tr.Value = p1;
+			entityManager.SetComponentData(e, tr);
+			
+			var scale = entityManager.GetComponentData<Scale>(e);
+			scale.Value = 1;
+			entityManager.SetComponentData(e, scale);
+		
+			
+			var rm = new RenderMesh();
+			rm.mesh = barMesh;
+			rm.material = barMaterial;
+			rm.castShadows = ShadowCastingMode.On;
+			rm.subMesh = barMesh.subMeshCount;
+			
+			entityManager.SetSharedComponentData(e, rm);
+
 		}
 
 		pointsList = null;

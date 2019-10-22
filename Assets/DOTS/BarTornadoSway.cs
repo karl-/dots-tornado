@@ -14,19 +14,19 @@ using Random = UnityEngine.Random;
 public class BarTornadoSway : ComponentSystem
 {
     float tornadoFader = 0f;
-    [Range(0f, 1f)] public float damping;
+    [Range(0f, 1f)] public float damping= 0.012f;
 
-    public float friction;
+    public float friction = 0.4f;
 
     public EntityQuery m_Group;
 
     public float3 tornadoPosition;
 
-    public float tornadoForce;
-    public float tornadoMaxForceDist;
-    public float tornadoHeight;
-    public float tornadoUpForce;
-    public float tornadoInwardForce;
+    public float tornadoForce = 0.022f;
+    public float tornadoMaxForceDist = 30.0f;
+    public float tornadoHeight = 50.0f;
+    public float tornadoUpForce = 1.4f;
+    public float tornadoInwardForce= 9.0f;
 
     protected override void OnCreate()
     {

@@ -8,7 +8,7 @@ using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine.Rendering;
 using Random = UnityEngine.Random;
-public class PointManager : MonoBehaviour {
+public class DotsPointGenerator : MonoBehaviour {
 	public Material barMaterial;
 	public Mesh barMesh;
 	[Range(0f,1f)]
@@ -227,7 +227,9 @@ public class PointManager : MonoBehaviour {
 			float3 p2 = new float3(b.point2.x, b.point2.y, b.point2.z);
 			var dotsBar = new DotsConversion.Bar();
 			dotsBar.a.position = p1;
+			dotsBar.a.previous = p1;
 			dotsBar.b.position = p2;
+			dotsBar.b.previous = p2;
 			dotsBar.a.neighborCount = b.point1.neighborCount;
 			dotsBar.b.neighborCount = b.point2.neighborCount;
 			
@@ -267,180 +269,4 @@ public class PointManager : MonoBehaviour {
 		Time.timeScale = 1f;
 	}
 
-	// Tornado simulation
-	void FixedUpdate ()
-	{
-		if (generating)
-			return;
-
-		tornadoFader = Mathf.Clamp01(tornadoFader + Time.deltaTime / 10f);
-
-		float invDamping = 1f - damping;
-
-		// Iterate over all points
-		for (int i = 0; i < pointCount; i++)
-		{
-			Point point = points[i];
-
-			// Anchor is a point that forms the ground triangle of a building
-			if (point.anchor == false)
-			{
-				float startX = point.x;
-				float startY = point.y;
-				float startZ = point.z;
-
-				point.oldY += .01f;
-
-				// Calculate the tornado force on this point
-				float tdx = tornadoX + TornadoSway(point.y) - point.x;
-				float tdz = tornadoZ - point.z;
-				float tornadoDist = Mathf.Sqrt(tdx * tdx + tdz * tdz);
-				tdx /= tornadoDist;
-				tdz /= tornadoDist;
-
-				// If the point is within max force distance of the tornado, apply force to this point
-				if (tornadoDist < tornadoMaxForceDist)
-				{
-					float force = (1f - tornadoDist / tornadoMaxForceDist);
-					float yFader = Mathf.Clamp01(1f - point.y / tornadoHeight);
-					// apply greater force at the base of the tornado, tapering as we ascend the Y axis
-					force *= tornadoFader * tornadoForce * Random.Range(-.3f, 1.3f);
-					float forceY = tornadoUpForce;
-					point.oldY -= forceY * force;
-					float forceX = -tdz + tdx * tornadoInwardForce * yFader;
-					float forceZ = tdx + tdz * tornadoInwardForce * yFader;
-					point.oldX -= forceX * force;
-					point.oldZ -= forceZ * force;
-				}
-
-				// dampen the effect of the tornado force (if applied)
-				point.x += (point.x - point.oldX) * invDamping;
-				point.y += (point.y - point.oldY) * invDamping;
-				point.z += (point.z - point.oldZ) * invDamping;
-
-				point.oldX = startX;
-				point.oldY = startY;
-				point.oldZ = startZ;
-
-				if (point.y < 0f)
-				{
-					point.y = 0f;
-					point.oldY = -point.oldY;
-					point.oldX += (point.x - point.oldX) * friction;
-					point.oldZ += (point.z - point.oldZ) * friction;
-				}
-			}
-		}
-
-		for (int i = 0; i < bars.Length; i++)
-		{
-			Bar bar = bars[i];
-
-			Point point1 = bar.point1;
-			Point point2 = bar.point2;
-
-			float dx = point2.x - point1.x;
-			float dy = point2.y - point1.y;
-			float dz = point2.z - point1.z;
-
-			// Calculate how much distance has been added due to the tornado force affecting points
-			float dist = Mathf.Sqrt(dx * dx + dy * dy + dz * dz);
-			float extraDist = dist - bar.length;
-
-			// When a point is affected by the suction, move it in the direction of the suck by half of the distance traveled
-			float pushX = (dx / dist * extraDist) * .5f;
-			float pushY = (dy / dist * extraDist) * .5f;
-			float pushZ = (dz / dist * extraDist) * .5f;
-
-			// again, skip applying force to anchor points
-			if (point1.anchor == false && point2.anchor == false)
-			{
-				point1.x += pushX;
-				point1.y += pushY;
-				point1.z += pushZ;
-				point2.x -= pushX;
-				point2.y -= pushY;
-				point2.z -= pushZ;
-			}
-			else if (point1.anchor)
-			{
-				point2.x -= pushX * 2f;
-				point2.y -= pushY * 2f;
-				point2.z -= pushZ * 2f;
-			}
-			else if (point2.anchor)
-			{
-				point1.x += pushX * 2f;
-				point1.y += pushY * 2f;
-				point1.z += pushZ * 2f;
-			}
-
-			if (dx / dist * bar.oldDX + dy / dist * bar.oldDY + dz / dist * bar.oldDZ < .99f)
-			{
-				// bar has rotated: expensive full-matrix computation
-				bar.matrix = Matrix4x4.TRS(new Vector3((point1.x + point2.x) * .5f, (point1.y + point2.y) * .5f, (point1.z + point2.z) * .5f),
-					Quaternion.LookRotation(new Vector3(dx, dy, dz)),
-					new Vector3(bar.thickness, bar.thickness, bar.length));
-				bar.oldDX = dx / dist;
-				bar.oldDY = dy / dist;
-				bar.oldDZ = dz / dist;
-			}
-			else
-			{
-				// bar hasn't rotated: only update the position elements
-				Matrix4x4 matrix = bar.matrix;
-				matrix.m03 = (point1.x + point2.x) * .5f;
-				matrix.m13 = (point1.y + point2.y) * .5f;
-				matrix.m23 = (point1.z + point2.z) * .5f;
-				bar.matrix = matrix;
-			}
-
-			// if a bar is extended to the point of breaking, split any neighbouring bars and instantiate a new point
-			// to keep the detached segment valid
-			if (Mathf.Abs(extraDist) > breakResistance)
-			{
-				if (point2.neighborCount > 1)
-				{
-					point2.neighborCount--;
-					Point newPoint = new Point();
-					newPoint.CopyFrom(point2);
-					newPoint.neighborCount = 1;
-					points[pointCount] = newPoint;
-					bar.point2 = newPoint;
-					pointCount++;
-				}
-				else if (point1.neighborCount > 1)
-				{
-					point1.neighborCount--;
-					Point newPoint = new Point();
-					newPoint.CopyFrom(point1);
-					newPoint.neighborCount = 1;
-					points[pointCount] = newPoint;
-					bar.point1 = newPoint;
-					pointCount++;
-				}
-			}
-
-			bar.minX = Mathf.Min(point1.x, point2.x);
-			bar.maxX = Mathf.Max(point1.x, point2.x);
-			bar.minY = Mathf.Min(point1.y, point2.y);
-			bar.maxY = Mathf.Max(point1.y, point2.y);
-			bar.minZ = Mathf.Min(point1.z, point2.z);
-			bar.maxZ = Mathf.Max(point1.z, point2.z);
-
-			matrices[i / instancesPerBatch][i % instancesPerBatch] = bar.matrix;
-		}
-	}
-
-	private void Update() {
-		tornadoX = Mathf.Cos(Time.time/6f) * 30f;
-		tornadoZ = Mathf.Sin(Time.time/6f * 1.618f) * 30f;
-		cam.position = new Vector3(tornadoX,10f,tornadoZ) - cam.forward * 60f;
-
-		if (matrices != null) {
-			for (int i = 0; i < matrices.Length; i++) {
-				Graphics.DrawMeshInstanced(barMesh,0,barMaterial,matrices[i],matrices[i].Length,matProps[i]);
-			}
-		}
-	}
 }

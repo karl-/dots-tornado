@@ -2,8 +2,6 @@
 using Unity.Entities;
 using Unity.Transforms;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
-using UnityEngine.Profiling;
 
 namespace DotsConversion
 {

@@ -20,8 +20,6 @@ public class TornadoParticleSpinSystem : JobComponentSystem
 
         public void Execute([ReadOnly] ref TornadoParticle particle, ref Translation translation)
         {
-            if (particle.tornadoId != tornado.id)
-                return;
             float3 position = translation.Value;
             float3 tornadoPos = new float3(tornadoPosition.x + (sin(position.y / 5f + time/4f) * 3f), position.y, tornadoPosition.z);
             float3 delta = (tornadoPos - position);

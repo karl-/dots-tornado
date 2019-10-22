@@ -26,19 +26,18 @@ namespace DotsConversion.Authoring
         public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
         {
             dstManager.AddComponent<DotsConversion.Tornado>(entity);
-            dstManager.SetComponentData(entity, new DotsConversion.Tornado
+            dstManager.SetComponentData(entity, new DotsConversion.Tornado()
             {
-                id = GetInstanceID(),
                 initialTranslation = transform.position,
                 spinRate = spinRate,
                 upwardSpeed = upwardSpeed,
                 height = height
             });
 
-            InstantiateParticles(GetInstanceID(), particleCount, radius, height, particleSizeRange);
+            InstantiateParticles(particleCount, radius, height, particleSizeRange);
         }
 
-        static void InstantiateParticles(int tornadoId, int count, float radius, float height, float2 size)
+        static void InstantiateParticles(int count, float radius, float height, float2 size)
         {
             EntityManager entityManager = World.Active.EntityManager;
 
@@ -61,7 +60,7 @@ namespace DotsConversion.Authoring
                     Random.Range(-radius, radius));
 
                 Entity entity = entityManager.CreateEntity(particleArchetype);
-                entityManager.SetComponentData(entity, new TornadoParticle() { RadiusMultiplier = Random.value, tornadoId = tornadoId });
+                entityManager.SetComponentData(entity, new TornadoParticle() { RadiusMultiplier = Random.value });
                 entityManager.SetComponentData(entity, new Translation() { Value = position });
                 entityManager.SetComponentData(entity, new Scale() { Value = Random.Range(size.x, size.y) });
                 entityManager.SetSharedComponentData(entity, new RenderMesh() { mesh = mesh, material = material });
@@ -74,7 +73,6 @@ namespace DotsConversion
 {
     public struct Tornado : IComponentData
     {
-        public int id; // todo Is there a better way to associate a tornado with it's particles?
         public float3 initialTranslation;
         public float spinRate;
         public float upwardSpeed;

@@ -28,6 +28,6 @@ namespace DotsConversion
 	{
 		public float thickness;
 	}
-	
+
 	public struct BarAnchor : IComponentData { }
 }

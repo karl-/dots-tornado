@@ -8,54 +8,56 @@ using Unity.Transforms;
 using UnityEngine;
 using static Unity.Mathematics.math;
 
-public class TornadoParticleSpinSystem : JobComponentSystem
+namespace DotsConversion
 {
-    [BurstCompile]
-    struct TornadoParticleSpinSystemJob : IJobForEach<TornadoParticle, Translation>
+    public class TornadoParticleSpinSystem : JobComponentSystem
     {
-        public float time;
-        public float deltaTime;
-        public float3 tornadoPosition;
-        public Tornado tornado;
-
-        public void Execute([ReadOnly] ref TornadoParticle particle, ref Translation translation)
+        [BurstCompile]
+        struct TornadoParticleSpinSystemJob : IJobForEach<TornadoParticle, Translation>
         {
-            float3 position = translation.Value;
-            float3 tornadoPos = new float3(tornadoPosition.x + (sin(position.y / 5f + time/4f) * 3f), position.y, tornadoPosition.z);
-            float3 delta = (tornadoPos - position);
-            float dist = length(delta);
-            delta /= dist;
-            float inForce = dist - Mathf.Clamp01(tornadoPos.y / tornado.height) * 30f * particle.RadiusMultiplier + 2f;
-            position += new float3(-delta.z * tornado.spinRate + delta.x * inForce, tornado.upwardSpeed, delta.x * tornado.spinRate + delta.z * inForce) * deltaTime;
-            if (position.y > tornado.height)
-                position = new Vector3(position.x, 0f, position.z);
-            translation.Value = position;
-        }
-    }
+            public float time;
+            public float deltaTime;
+            public float3 tornadoPosition;
+            public TornadoParticleSettings tornado;
 
-    protected override JobHandle OnUpdate(JobHandle inputDependencies)
-    {
-        EntityQuery tornadoQuery = GetEntityQuery(typeof(Tornado), typeof(Translation));
-        NativeArray<Tornado> tornadoes = tornadoQuery.ToComponentDataArray<Tornado>(Allocator.TempJob);
-        NativeArray<Translation> positions = tornadoQuery.ToComponentDataArray<Translation>(Allocator.TempJob);
-        int tornadoCount = tornadoes.Length;
-        JobHandle handle = inputDependencies;
-
-        for(int i = 0; i < tornadoCount; i++)
-        {
-            var job = new TornadoParticleSpinSystemJob();
-            job.time = Time.time;
-            job.deltaTime = Time.deltaTime;
-            job.tornadoPosition = positions[i].Value;
-            job.tornado = tornadoes[i];
-            handle = job.Schedule(this, handle);
+            public void Execute([ReadOnly] ref TornadoParticle particle, ref Translation translation)
+            {
+                float3 position = translation.Value;
+                float3 tornadoPos = new float3(tornadoPosition.x + (sin(position.y / 5f + time / 4f) * 3f), position.y, tornadoPosition.z);
+                float3 delta = (tornadoPos - position);
+                float dist = length(delta);
+                delta /= dist;
+                float inForce = dist - Mathf.Clamp01(tornadoPos.y / tornado.Height) * 30f * particle.RadiusMultiplier + 2f;
+                position += new float3(-delta.z * tornado.SpinRate + delta.x * inForce, tornado.UpwardSpeed, delta.x * tornado.SpinRate + delta.z * inForce) * deltaTime;
+                if (position.y > tornado.Height)
+                    position = new Vector3(position.x, 0f, position.z);
+                translation.Value = position;
+            }
         }
 
-        tornadoes.Dispose();
-        positions.Dispose();
+        protected override JobHandle OnUpdate(JobHandle inputDependencies)
+        {
+            TornadoParticleSettings tornado = GetSingleton<TornadoParticleSettings>();
+            EntityQuery tornadoQuery = GetEntityQuery(typeof(Tornado), typeof(Translation));
+            NativeArray<Translation> positions = tornadoQuery.ToComponentDataArray<Translation>(Allocator.TempJob);
 
-        return handle;
+            int tornadoCount = positions.Length;
+            JobHandle handle = inputDependencies;
+
+            // todo This doesn't actually support any more than 1 tornado
+            for (int i = 0; i < tornadoCount; i++)
+            {
+                var job = new TornadoParticleSpinSystemJob();
+                job.time = Time.time;
+                job.deltaTime = Time.deltaTime;
+                job.tornado = tornado;
+                job.tornadoPosition = positions[i].Value;
+                handle = job.Schedule(this, handle);
+            }
+
+            positions.Dispose();
+
+            return handle;
+        }
     }
 }
-
-

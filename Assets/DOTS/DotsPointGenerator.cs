@@ -7,6 +7,7 @@ using Unity.Mathematics;
 using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine.Rendering;
+using MeshRenderer = DotsConversion.MeshRenderer;
 using Random = UnityEngine.Random;
 public class DotsPointGenerator : MonoBehaviour {
 	public Material barMaterial;
@@ -81,7 +82,7 @@ public class DotsPointGenerator : MonoBehaviour {
 			typeof(DotsConversion.Bar), 
 			typeof(DotsConversion.BarThickness),
 			typeof(LocalToWorld), 
-			typeof(RenderMesh)
+			typeof(MeshRenderer)
 		};
 			
 		var e = entityManager.CreateEntity(ct);
@@ -100,11 +101,9 @@ public class DotsPointGenerator : MonoBehaviour {
 		var lw = entityManager.GetComponentData<LocalToWorld>(e);
 		entityManager.SetComponentData(e, lw);
 
-		var rm = new RenderMesh();
+		var rm = new MeshRenderer();
 		rm.mesh = barMesh;
 		rm.material = barMaterial;
-		rm.castShadows = ShadowCastingMode.On;
-		rm.subMesh = barMesh.subMeshCount;
 			
 		entityManager.SetSharedComponentData(e, rm);
 	}

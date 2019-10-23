@@ -8,16 +8,18 @@ namespace DotsConversion
         float m_BreakDistance;
         ComponentDataFromEntity<Point> m_Points;
         EntityArchetype m_PointArchetype;
+        EntityQueryBuilder.F_D<Bar> m_CalculateBreak;
 
         protected override void OnCreate()
         {
             m_PointArchetype = EntityManager.CreateArchetype(typeof(Point));
+            m_CalculateBreak = CalculateBreak;
         }
 
         protected override void OnUpdate()
         {
             m_BreakDistance = GetSingleton<BarSettings>().BreakDistance;
-            Entities.ForEach<Bar>(CalculateBreak);
+            Entities.ForEach(m_CalculateBreak);
         }
 
         void CalculateBreak(ref Bar bar)

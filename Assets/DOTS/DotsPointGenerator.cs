@@ -75,12 +75,7 @@ public class DotsPointGenerator : MonoBehaviour
 
 		var lw = entityManager.GetComponentData<LocalToWorld>(e);
 		entityManager.SetComponentData(e, lw);
-
-		var rm = new MeshRenderer();
-		rm.mesh = barMesh;
-		rm.material = barMaterial;
-
-		entityManager.SetSharedComponentData(e, rm);
+		entityManager.SetSharedComponentData(e, new MeshRenderer() { mesh = barMesh, material = barMaterial });
 	}
 
 	IEnumerator Generate()

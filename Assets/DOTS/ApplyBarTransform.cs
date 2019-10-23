@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace DotsConversion
 {
+    [UpdateAfter(typeof(InitializePointsSystem))]
     public sealed class ApplyBarTransform : JobComponentSystem
     {
         struct ApplyTransformJob : IJobForEach<Bar, BarThickness, LocalToWorld>

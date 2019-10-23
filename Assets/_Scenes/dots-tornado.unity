@@ -391,7 +391,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1798718608
 Transform:
   m_ObjectHideFlags: 0
@@ -465,10 +465,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f401cba7a7fab48ec8d354f0dc26c6fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  buildingCount: 32
+  buildingCount: 35
   buildingMinHeight: 4
   buildingMaxHeight: 12
-  additionalPointCount: 150
+  additionalPointCount: 600
+  mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  material: {fileID: 2100000, guid: 0b41184bd9ec5d34facaae17b8fa8aba, type: 2}
+  barMaterial: {fileID: 2100000, guid: 4012e1b21a491ab44899652bc98c3d02, type: 2}
+  barMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!4 &1919291512
 Transform:
   m_ObjectHideFlags: 0

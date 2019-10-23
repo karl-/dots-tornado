@@ -1,4 +1,5 @@
-﻿using Unity.Burst;
+﻿using System;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -10,11 +11,13 @@ using Random = Unity.Mathematics.Random;
 
 namespace DotsConversion
 {
+    [Serializable]
     struct TornadoSwayRandom : IComponentData
     {
         public Random Value;
     }
 
+    [Serializable]
     struct TornadoSwayFader : IComponentData
     {
         public float Value;
@@ -27,7 +30,7 @@ namespace DotsConversion
             base.OnCreate();
             Entity random = World.Active.EntityManager.CreateEntity(typeof(TornadoSwayRandom));
             Entity fader = World.Active.EntityManager.CreateEntity(typeof(TornadoSwayFader));
-            EntityManager.SetComponentData(random, new TornadoSwayRandom() { Value = new Random() });
+            EntityManager.SetComponentData(random, new TornadoSwayRandom() { Value = new Random(42) });
             EntityManager.SetComponentData(fader, new TornadoSwayFader() { Value = 0f });
         }
 

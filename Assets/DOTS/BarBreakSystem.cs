@@ -19,6 +19,7 @@ namespace DotsConversion
         protected override void OnUpdate()
         {
             m_BreakDistance = GetSingleton<BarSettings>().BreakDistance;
+            m_Points = GetComponentDataFromEntity<Point>();
             Entities.ForEach(m_CalculateBreak);
         }
 

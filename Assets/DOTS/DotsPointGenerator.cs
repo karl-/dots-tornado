@@ -54,6 +54,60 @@ public class DotsPointGenerator : MonoBehaviour {
 		return Mathf.Sin(y / 5f + Time.time/4f) * 3f;
 	}
 
+	void CreatePointEntity(ref Point point, bool active=true)
+	{
+		var entityManager = World.Active.EntityManager;
+		ComponentType[] ct =
+		{
+			typeof(DotsConversion.Point)
+		};
+
+		var e = entityManager.CreateEntity(ct);
+		var dPt = new DotsConversion.Point();
+		dPt.active = active;
+		dPt.anchor = point.anchor;
+		dPt.position = new float3(point.x, point.y, point.z);
+		dPt.previous = new float3(dPt.position);
+		dPt.neighborCount = point.neighborCount;
+		point.entity = e;
+	}
+
+	void CreateBarEntity(ref Bar bar)
+	{
+		var entityManager = World.Active.EntityManager;
+
+		ComponentType[] ct = 
+		{
+			typeof(DotsConversion.Bar), 
+			typeof(DotsConversion.BarThickness),
+			typeof(LocalToWorld), 
+			typeof(RenderMesh)
+		};
+			
+		var e = entityManager.CreateEntity(ct);
+		if ( bar.point1.anchor|| bar.point2.anchor) 
+			entityManager.AddComponentData(e, new BarAnchor());
+		DotsConversion.Bar dotsBar = new DotsConversion.Bar();
+		dotsBar.a = bar.point1.entity;
+		dotsBar.b = bar.point2.entity;
+		dotsBar.barLength = bar.length;
+			
+		entityManager.SetComponentData(e, dotsBar);
+		var dotsBarThickness = new BarThickness();
+		dotsBarThickness.thickness = bar.thickness;
+		entityManager.SetComponentData(e, dotsBarThickness);
+		
+		var lw = entityManager.GetComponentData<LocalToWorld>(e);
+		entityManager.SetComponentData(e, lw);
+
+		var rm = new RenderMesh();
+		rm.mesh = barMesh;
+		rm.material = barMaterial;
+		rm.castShadows = ShadowCastingMode.On;
+		rm.subMesh = barMesh.subMeshCount;
+			
+		entityManager.SetSharedComponentData(e, rm);
+	}
 	IEnumerator Generate() {
 		generating = true;
 
@@ -61,6 +115,7 @@ public class DotsPointGenerator : MonoBehaviour {
 		List<Bar> barsList = new List<Bar>();
 		List<List<Matrix4x4>> matricesList = new List<List<Matrix4x4>>();
 		matricesList.Add(new List<Matrix4x4>());
+
 
 		// Create 35 buildings
 		for (int i = 0; i < 35; i++)
@@ -87,7 +142,7 @@ public class DotsPointGenerator : MonoBehaviour {
 					point.anchor = true;
 				}
 				pointsList.Add(point);
-
+				
 				point = new Point();
 				point.x = pos.x - spacing;
 				point.y = j * spacing;
@@ -188,6 +243,14 @@ public class DotsPointGenerator : MonoBehaviour {
 		}
 		Debug.Log(pointCount + " points, room for " + points.Length + " (" + barsList.Count + " bars)");
 
+		for (int i = 0; i < points.Length; i++)
+		{
+			if ( i % 100 == 0) 
+				Debug.Log( "Calling CreatePointEntity for " + i);
+			if ( points[i] != null)
+				CreatePointEntity(ref points[i]);
+		}
+
 		// Copy generated bars to an array that will be kept
 		bars = barsList.ToArray();
 
@@ -208,52 +271,19 @@ public class DotsPointGenerator : MonoBehaviour {
 			}
 		}
 
-//		var entityManager = World.Active.EntityManager;
-//		foreach (var b in barsList)
-//		{
-//			ComponentType[] ct =
-//			{
-//				typeof(DotsConversion.Bar),
-//				typeof(DotsConversion.BarThickness),
-//				typeof(LocalToWorld),
-//				typeof(RenderMesh)
-//			};
-//
-//			var e = entityManager.CreateEntity(ct);
-//			if ( b.point1.anchor || b.point2.anchor)
-//				entityManager.AddComponentData(e, new BarAnchor());
-//
-//			float3 p1 = new float3(b.point1.x, b.point1.y, b.point1.z);
-//			float3 p2 = new float3(b.point2.x, b.point2.y, b.point2.z);
-//			var dotsBar = new DotsConversion.Bar();
-//			dotsBar.a.position = p1;
-//			dotsBar.a.previous = p1;
-//			dotsBar.a.barLength = math.distance(p1, p2);
-//			dotsBar.b.position = p2;
-//			dotsBar.b.previous = p2;
-//			dotsBar.b.barLength = dotsBar.a.barLength;
-//			dotsBar.a.neighborCount = b.point1.neighborCount;
-//			dotsBar.b.neighborCount = b.point2.neighborCount;
-//
-//			entityManager.SetComponentData(e, dotsBar);
-//			var dotsBarThickness = new DotsConversion.BarThickness();
-//			dotsBarThickness.thickness = b.thickness;
-//			entityManager.SetComponentData(e, dotsBarThickness);
-//
-//
-//			var lw = entityManager.GetComponentData<LocalToWorld>(e);
-//
-//			entityManager.SetComponentData(e, lw);
-//
-//			var rm = new RenderMesh();
-//			rm.mesh = barMesh;
-//			rm.material = barMaterial;
-//			rm.castShadows = ShadowCastingMode.On;
-//			rm.subMesh = barMesh.subMeshCount;
-//
-//			entityManager.SetSharedComponentData(e, rm);
-//
-//		}
+		
+		for(int i = 0; i < bars.Length; ++i )
+		{
+			CreateBarEntity(ref bars[i] );
+		}
+
+		Point fPoint = new Point();
+		fPoint.anchor = false;
+		
+		for (int i = 0; i < bars.Length*2; i++)
+		{
+			CreatePointEntity(ref fPoint, false);
+		}
 
 		pointsList = null;
 		barsList = null;

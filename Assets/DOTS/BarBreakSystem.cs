@@ -24,6 +24,9 @@ namespace DotsConversion
 
         void CalculateBreak(ref Bar bar)
         {
+            if (bar.a == Entity.Null)
+                return;
+
             if (math.abs(bar.extraDist) > m_BreakDistance)
             {
                 Point pointB = m_Points[bar.b];

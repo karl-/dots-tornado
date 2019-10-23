@@ -5,7 +5,7 @@ namespace DotsConversion
 {
     public sealed class BarBreakSystem : ComponentSystem
     {
-        const float k_BreakDistance = 0.4f;
+        float m_BreakDistance;
         ComponentDataFromEntity<Point> m_Points;
         EntityArchetype m_PointArchetype;
 
@@ -16,12 +16,13 @@ namespace DotsConversion
 
         protected override void OnUpdate()
         {
+            m_BreakDistance = GetSingleton<BarSettings>().BreakDistance;
             Entities.ForEach<Bar>(CalculateBreak);
         }
 
         void CalculateBreak(ref Bar bar)
         {
-            if (math.abs(bar.extraDist) > k_BreakDistance)
+            if (math.abs(bar.extraDist) > m_BreakDistance)
             {
                 Point pointB = m_Points[bar.b];
                 if (pointB.neighborCount > 1)

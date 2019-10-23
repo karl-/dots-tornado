@@ -16,6 +16,8 @@ public class DotsPointGenerator : MonoBehaviour
 	Bar[] bars;
 	public int pointCount;
 
+    public float barBreakDistance;
+
 	Matrix4x4[][] matrices;
 	MaterialPropertyBlock[] matProps;
 

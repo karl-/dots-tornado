@@ -38,6 +38,8 @@ public class ApplyBarTornadoSwayToBarSystem : ComponentSystem
         // Calculate how much distance has been added due to the tornado force affecting points
         float dist = math.sqrt(dx * dx + dy * dy + dz * dz);
         float extraDist = dist - bar.barLength;
+        if (math.abs(extraDist) < 0.01)
+            return;
         // When a point is affected by the suction, move it in the direction of the suck by half of the distance traveled
         float pushX = (dx / dist * extraDist) * .5f;
         float pushY = (dy / dist * extraDist) * .5f;

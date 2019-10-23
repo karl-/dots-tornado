@@ -3,6 +3,7 @@ using Unity.Mathematics;
 
 namespace DotsConversion
 {
+   // [UpdateAfter(typeof(ApplyBarTornadoSwayToBarSystem))]
     public sealed class BarBreakSystem : ComponentSystem
     {
         float m_BreakDistance;

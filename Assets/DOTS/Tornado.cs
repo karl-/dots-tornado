@@ -5,27 +5,36 @@ using Unity.Transforms;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+namespace DotsConversion
+{
+    public struct Tornado : IComponentData
+    {
+        public float3 initialTranslation;
+
+        public float TornadoFader;
+        public float InvDamping;
+        public float Friction;
+        public float TornadoForce;
+        public float TornadoUpForce;
+        public float TornadoInwardForce;
+        public float TornadoMaxForceDist;
+        public float TornadoHeight;
+    }
+}
+
 namespace DotsConversion.Authoring
 {
     [DisallowMultipleComponent]
     [RequiresEntityConversion]
     public sealed class Tornado : MonoBehaviour, IConvertGameObjectToEntity
     {
-        [Range(10, 100000)]
-        public int particleCount = 1000;
-        [Range(10, 100)]
-        public float radius = 50f;
-        [Range(10, 100)]
-        public float height = 50f;
-        [Range(10, 100)]
-        public float spinRate = 37f;
-        [Range(1, 20)]
-        public float upwardSpeed = 6f;
-        public Vector2 particleSizeRange = new Vector2(.2f, .7f);
-
-        [Header("Particles")]
-        public Mesh mesh;
-        public Material material;
+        public float damping = .012f;
+        public float friction = .4f;
+        public float tornadoForce = .022f;
+        public float tornadoUpForce = 1.4f;
+        public float tornadoInwardForce = 9f;
+        public float tornadoMaxForceDist = 30f;
+        public float tornadoHeight = 50f;
 
         public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
         {
@@ -33,49 +42,15 @@ namespace DotsConversion.Authoring
             dstManager.SetComponentData(entity, new DotsConversion.Tornado()
             {
                 initialTranslation = transform.position,
-                spinRate = spinRate,
-                upwardSpeed = upwardSpeed,
-                height = height
+
+                InvDamping = 1f - damping,
+                Friction = friction,
+                TornadoForce = tornadoForce,
+                TornadoUpForce = tornadoUpForce,
+                TornadoInwardForce = tornadoInwardForce,
+                TornadoMaxForceDist = tornadoMaxForceDist,
+                TornadoHeight = tornadoHeight
             });
-
-            InstantiateParticles(particleCount, radius, height, particleSizeRange);
         }
-
-        void InstantiateParticles(int count, float radius, float height, float2 size)
-        {
-            EntityManager entityManager = World.Active.EntityManager;
-
-            EntityArchetype particleArchetype = entityManager.CreateArchetype(
-                typeof(TornadoParticle),
-                typeof(Translation),
-                typeof(Scale),
-                typeof(MeshRenderer),
-                typeof(LocalToWorld));
-
-            for (int i = 1; i < count; i++)
-            {
-                var position = new float3(
-                    Random.Range(-radius, radius),
-                    Random.Range(0f, height),
-                    Random.Range(-radius, radius));
-
-                Entity entity = entityManager.CreateEntity(particleArchetype);
-                entityManager.SetComponentData(entity, new TornadoParticle() { RadiusMultiplier = Random.value });
-                entityManager.SetComponentData(entity, new Translation() { Value = position });
-                entityManager.SetComponentData(entity, new Scale() { Value = Random.Range(size.x, size.y) });
-                entityManager.SetSharedComponentData(entity, new MeshRenderer() { mesh = mesh, material = material });
-            }
-        }
-    }
-}
-
-namespace DotsConversion
-{
-    public struct Tornado : IComponentData
-    {
-        public float3 initialTranslation;
-        public float spinRate;
-        public float upwardSpeed;
-        public float height;
     }
 }

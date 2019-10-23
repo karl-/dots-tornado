@@ -42,6 +42,7 @@ public class DotsPointGenerator : MonoBehaviour
 		dPt.previous = new float3(dPt.position);
 		dPt.neighborCount = point.neighborCount;
 		point.entity = e;
+		entityManager.SetComponentData(e, dPt);
 	}
 
 	void CreateBarEntity(ref Bar bar)

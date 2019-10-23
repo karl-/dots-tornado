@@ -40,46 +40,46 @@ public class BarTornadoSway : ComponentSystem
 
     void SwayABar(ref DotsConversion.Bar b)
     {
-        SwayAPoint(ref b.a);
-        SwayAPoint(ref b.b);
- 
-            DotsConversion.Point point1 = b.a;
-            DotsConversion.Point point2 = b.b;
-
-            float dx = point2.position.x - point1.position.x;
-            float dy = point2.position.y - point1.position.y;
-            float dz = point2.position.z - point1.position.z;
-
-            // Calculate how much distance has been added due to the tornado force affecting points
-            float dist = Mathf.Sqrt(dx * dx + dy * dy + dz * dz);
-            float extraDist = dist - b.a.barLength;
-
-            // When a point is affected by the suction, move it in the direction of the suck by half of the distance traveled
-            float pushX = (dx / dist * extraDist) * .5f;
-            float pushY = (dy / dist * extraDist) * .5f;
-            float pushZ = (dz / dist * extraDist) * .5f;
-
-           {
-                point1.position.x += pushX;
-                point1.position.y += pushY;
-                point1.position.z += pushZ;
-                point2.position.x -= pushX;
-                point2.position.y -= pushY;
-                point2.position.z -= pushZ;
-            }
-//            else if (point1.anchor)
-//            {
-//                point2.position.x -= pushX * 2f;
-//                point2.position.y -= pushY * 2f;
-//                point2.position.z -= pushZ * 2f;
+//        SwayAPoint(ref b.a);
+//        SwayAPoint(ref b.b);
+//
+//            DotsConversion.Point point1 = b.a;
+//            DotsConversion.Point point2 = b.b;
+//
+//            float dx = point2.position.x - point1.position.x;
+//            float dy = point2.position.y - point1.position.y;
+//            float dz = point2.position.z - point1.position.z;
+//
+//            // Calculate how much distance has been added due to the tornado force affecting points
+//            float dist = Mathf.Sqrt(dx * dx + dy * dy + dz * dz);
+//            float extraDist = dist - b.a.barLength;
+//
+//            // When a point is affected by the suction, move it in the direction of the suck by half of the distance traveled
+//            float pushX = (dx / dist * extraDist) * .5f;
+//            float pushY = (dy / dist * extraDist) * .5f;
+//            float pushZ = (dz / dist * extraDist) * .5f;
+//
+//           {
+//                point1.position.x += pushX;
+//                point1.position.y += pushY;
+//                point1.position.z += pushZ;
+//                point2.position.x -= pushX;
+//                point2.position.y -= pushY;
+//                point2.position.z -= pushZ;
 //            }
-//            else if (point2.anchor)
-//            {
-//                point1.position.x += pushX * 2f;
-//                point1.position.y += pushY * 2f;
-//                point1.position.z += pushZ * 2f;
-//            }
-
+////            else if (point1.anchor)
+////            {
+////                point2.position.x -= pushX * 2f;
+////                point2.position.y -= pushY * 2f;
+////                point2.position.z -= pushZ * 2f;
+////            }
+////            else if (point2.anchor)
+////            {
+////                point1.position.x += pushX * 2f;
+////                point1.position.y += pushY * 2f;
+////                point1.position.z += pushZ * 2f;
+////            }
+//
 
     }
 
@@ -134,9 +134,9 @@ public class BarTornadoSway : ComponentSystem
             point.previous.x += (point.position.x - point.previous.x) * friction;
             point.previous.z += (point.position.z - point.previous.z) * friction;
         }
-        
-        
-        
+
+
+
     }
 
     protected override void OnUpdate()

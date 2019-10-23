@@ -207,57 +207,56 @@ public class PointManager : MonoBehaviour {
 				matProps[i / instancesPerBatch] = block;
 			}
 		}
-		
-		var entityManager = World.Active.EntityManager;
-		foreach (var b in barsList)
-		{
-			ComponentType[] ct = 
-			{
-				typeof(DotsConversion.Bar), 
-				typeof(DotsConversion.BarThickness),
-				typeof(LocalToWorld), 
-				typeof(RenderMesh)
-			};
-			
-			var e = entityManager.CreateEntity(ct);
-			if ( b.point1.anchor || b.point2.anchor) 
-				entityManager.AddComponentData(e, new BarAnchor());
-			
-			float3 p1 = new float3(b.point1.x, b.point1.y, b.point1.z);
-			float3 p2 = new float3(b.point2.x, b.point2.y, b.point2.z);
-			var dotsBar = new DotsConversion.Bar();
-			dotsBar.a.position = p1;
-			dotsBar.b.position = p2;
-			dotsBar.a.neighborCount = b.point1.neighborCount;
-			dotsBar.b.neighborCount = b.point2.neighborCount;
-			
-			entityManager.SetComponentData(e, dotsBar);
-			var dotsBarThickness = new DotsConversion.BarThickness();
-			dotsBarThickness.thickness = b.thickness;
-			entityManager.SetComponentData(e, dotsBarThickness);
-			
-			
-			var lw = entityManager.GetComponentData<LocalToWorld>(e);
 
-			entityManager.SetComponentData(e, lw);
-			//var tr = entityManager.GetComponentData<Translation>(e);
-			//tr.Value = p1;
-			//entityManager.SetComponentData(e, tr);
-			
-			//var scale = entityManager.GetComponentData<Scale>(e);
-			//scale.Value = 1;
-			//entityManager.SetComponentData(e, scale);
-		
-			
-			var rm = new RenderMesh();
-			rm.mesh = barMesh;
-			rm.material = barMaterial;
-			rm.castShadows = ShadowCastingMode.On;
-			rm.subMesh = barMesh.subMeshCount;
-			
-			entityManager.SetSharedComponentData(e, rm);
-
-		}
+//		var entityManager = World.Active.EntityManager;
+//		foreach (var b in barsList)
+//		{
+//			ComponentType[] ct =
+//			{
+//				typeof(DotsConversion.Bar),
+//				typeof(DotsConversion.BarThickness),
+//				typeof(LocalToWorld),
+//				typeof(RenderMesh)
+//			};
+//
+//			var e = entityManager.CreateEntity(ct);
+//			if ( b.point1.anchor || b.point2.anchor)
+//				entityManager.AddComponentData(e, new BarAnchor());
+//
+//			float3 p1 = new float3(b.point1.x, b.point1.y, b.point1.z);
+//			float3 p2 = new float3(b.point2.x, b.point2.y, b.point2.z);
+//			var dotsBar = new DotsConversion.Bar();
+//			dotsBar.a.position = p1;
+//			dotsBar.b.position = p2;
+//			dotsBar.a.neighborCount = b.point1.neighborCount;
+//			dotsBar.b.neighborCount = b.point2.neighborCount;
+//
+//			entityManager.SetComponentData(e, dotsBar);
+//			var dotsBarThickness = new DotsConversion.BarThickness();
+//			dotsBarThickness.thickness = b.thickness;
+//			entityManager.SetComponentData(e, dotsBarThickness);
+//
+//
+//			var lw = entityManager.GetComponentData<LocalToWorld>(e);
+//
+//			entityManager.SetComponentData(e, lw);
+//			//var tr = entityManager.GetComponentData<Translation>(e);
+//			//tr.Value = p1;
+//			//entityManager.SetComponentData(e, tr);
+//
+//			//var scale = entityManager.GetComponentData<Scale>(e);
+//			//scale.Value = 1;
+//			//entityManager.SetComponentData(e, scale);
+//
+//
+//			var rm = new RenderMesh();
+//			rm.mesh = barMesh;
+//			rm.material = barMaterial;
+//			rm.castShadows = ShadowCastingMode.On;
+//			rm.subMesh = barMesh.subMeshCount;
+//
+//			entityManager.SetSharedComponentData(e, rm);
+//		}
 
 		pointsList = null;
 		barsList = null;

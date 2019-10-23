@@ -4,7 +4,7 @@ using Unity.Mathematics;
 
 namespace DotsConversion
 {
-	public struct Point
+	public struct Point : IComponentData
 	{
 		public float3 position, previous;
 		public bool active;
@@ -28,6 +28,6 @@ namespace DotsConversion
 	{
 		public float thickness;
 	}
-	
+
 	public struct BarAnchor : IComponentData { }
 }

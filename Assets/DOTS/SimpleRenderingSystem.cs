@@ -51,8 +51,6 @@ namespace DotsConversion
 
         void AddMatrixToBuffer(ref LocalToWorld matrix)
         {
-            Matrix4x4 m = matrix.Value;
-            
             m_MatricesBuffer.Add(matrix.Value);
         }
 

@@ -70,6 +70,7 @@ public class DotsPointGenerator : MonoBehaviour {
 		dPt.position = new float3(point.x, point.y, point.z);
 		dPt.previous = new float3(dPt.position);
 		dPt.neighborCount = point.neighborCount;
+	    entityManager.SetComponentData(e, dPt);
 		point.entity = e;
 	}
 

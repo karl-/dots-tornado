@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Entities;
 using UnityEngine;
 
 public class Point {
@@ -14,6 +15,7 @@ public class Point {
 	public bool anchor;
 
 	public int neighborCount;
+	public Entity entity;
 
 	public void CopyFrom(Point other) {
 		x = other.x;

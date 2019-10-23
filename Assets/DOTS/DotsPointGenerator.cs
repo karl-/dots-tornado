@@ -228,8 +228,10 @@ public class DotsPointGenerator : MonoBehaviour {
 			var dotsBar = new DotsConversion.Bar();
 			dotsBar.a.position = p1;
 			dotsBar.a.previous = p1;
+			dotsBar.a.barLength = math.distance(p1, p2);
 			dotsBar.b.position = p2;
 			dotsBar.b.previous = p2;
+			dotsBar.b.barLength = dotsBar.a.barLength;
 			dotsBar.a.neighborCount = b.point1.neighborCount;
 			dotsBar.b.neighborCount = b.point2.neighborCount;
 			
@@ -242,15 +244,7 @@ public class DotsPointGenerator : MonoBehaviour {
 			var lw = entityManager.GetComponentData<LocalToWorld>(e);
 
 			entityManager.SetComponentData(e, lw);
-			//var tr = entityManager.GetComponentData<Translation>(e);
-			//tr.Value = p1;
-			//entityManager.SetComponentData(e, tr);
-			
-			//var scale = entityManager.GetComponentData<Scale>(e);
-			//scale.Value = 1;
-			//entityManager.SetComponentData(e, scale);
-		
-			
+
 			var rm = new RenderMesh();
 			rm.mesh = barMesh;
 			rm.material = barMaterial;

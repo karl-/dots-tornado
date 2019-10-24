@@ -15,10 +15,10 @@ namespace DotsConversion
         [BurstCompile]
         struct TornadoParticleSpinSystemJob : IJobForEach<TornadoParticle, Translation>
         {
-            public float time;
-            public float deltaTime;
-            public float3 tornadoPosition;
-            public TornadoParticleSettings tornado;
+            [ReadOnly] public float time;
+            [ReadOnly] public float deltaTime;
+            [ReadOnly] public float3 tornadoPosition;
+            [ReadOnly] public TornadoParticleSettings tornado;
 
             public void Execute([ReadOnly] ref TornadoParticle particle, ref Translation translation)
             {
@@ -38,26 +38,15 @@ namespace DotsConversion
         protected override JobHandle OnUpdate(JobHandle inputDependencies)
         {
             TornadoParticleSettings tornado = GetSingleton<TornadoParticleSettings>();
-            EntityQuery tornadoQuery = GetEntityQuery(typeof(Tornado), typeof(Translation));
-            NativeArray<Translation> positions = tornadoQuery.ToComponentDataArray<Translation>(Allocator.TempJob);
+            Entity tornadoEntity = GetSingletonEntity<Tornado>();
+            Translation tornadoTranslation = EntityManager.GetComponentData<Translation>(tornadoEntity);
 
-            int tornadoCount = positions.Length;
-            JobHandle handle = inputDependencies;
-
-            // todo This doesn't actually support any more than 1 tornado
-            for (int i = 0; i < tornadoCount; i++)
-            {
-                var job = new TornadoParticleSpinSystemJob();
-                job.time = Time.time;
-                job.deltaTime = Time.deltaTime;
-                job.tornado = tornado;
-                job.tornadoPosition = positions[i].Value;
-                handle = job.Schedule(this, handle);
-            }
-
-            positions.Dispose();
-
-            return handle;
+            var job = new TornadoParticleSpinSystemJob();
+            job.time = Time.time;
+            job.deltaTime = Time.deltaTime;
+            job.tornado = tornado;
+            job.tornadoPosition = tornadoTranslation.Value;
+            return job.Schedule(this, inputDependencies);
         }
     }
 }

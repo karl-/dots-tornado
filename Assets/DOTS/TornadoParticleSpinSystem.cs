@@ -27,7 +27,7 @@ namespace DotsConversion
                 float3 delta = (tornadoPos - position);
                 float dist = length(delta);
                 delta /= dist;
-                float inForce = dist - Mathf.Clamp01(tornadoPos.y / tornado.Height) * 30f * particle.RadiusMultiplier + 2f;
+                float inForce = dist - math.clamp(tornadoPos.y / tornado.Height,0f, 1f) * 30f * particle.RadiusMultiplier + 2f;
                 position += new float3(-delta.z * tornado.SpinRate + delta.x * inForce, tornado.UpwardSpeed, delta.x * tornado.SpinRate + delta.z * inForce) * deltaTime;
                 if (position.y > tornado.Height)
                     position = new Vector3(position.x, 0f, position.z);

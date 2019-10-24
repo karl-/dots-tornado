@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -13,8 +14,8 @@ namespace DotsConversion
         const int k_ChunkLimit = 1023;
 
         static readonly List<MeshRenderer> s_UniqueRenderersBuffer = new List<MeshRenderer>();
-        readonly List<Matrix4x4> m_MatricesBuffer = new List<Matrix4x4>(1024);
-        readonly List<Matrix4x4> m_ChunkBuffer = new List<Matrix4x4>(k_ChunkLimit);
+        Matrix4x4[] m_MatricesBuffer = new Matrix4x4[1023];
+        Matrix4x4[] m_ChunkBuffer = new Matrix4x4[1023];
         EntityQueryBuilder.F_D<LocalToWorld> m_AddToMatrices;
         EntityQuery m_MeshQuery;
 
@@ -38,13 +39,12 @@ namespace DotsConversion
                     continue;
 
                 m_MeshQuery.SetFilter(renderer);
-                m_MatricesBuffer.Clear();
+
                 Entities.With(m_MeshQuery).ForEach(m_AddToMatrices);
 
-                for (int j = 0; j < m_MatricesBuffer.Count; j += k_ChunkLimit)
+                for (int j = 0; j < m_MatricesBuffer.Length; j += k_ChunkLimit)
                 {
-                    m_ChunkBuffer.Clear();
-                    CopyRangeToList(m_MatricesBuffer, j, math.min(m_MatricesBuffer.Count - j, k_ChunkLimit), m_ChunkBuffer);
+                    CopyRangeToList(m_MatricesBuffer, j, math.min(m_MatricesBuffer.Length - j, k_ChunkLimit), ref m_ChunkBuffer);
                     Graphics.DrawMeshInstanced(renderer.mesh, 0, renderer.material, m_ChunkBuffer);
                 }
             }
@@ -52,14 +52,14 @@ namespace DotsConversion
 
         void AddMatrixToBuffer(ref LocalToWorld matrix)
         {
-            m_MatricesBuffer.Add(matrix.Value);
+            m_MatricesBuffer.Append(matrix.Value);
         }
 
-        static void CopyRangeToList<T>(List<T> original, int index, int length, List<T> target)
+        static void CopyRangeToList(Matrix4x4[] original, int index, int length, ref Matrix4x4[] target)
         {
             for (int i = index, count = index + length; i < count; ++i)
             {
-                target.Add(original[i]);
+                target[i] = original[i];
             }
         }
     }

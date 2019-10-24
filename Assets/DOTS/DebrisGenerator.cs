@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using Unity.Entities;
-using Unity.Transforms;
 using UnityEngine;
 
 namespace DotsConversion
 {
     [Serializable]
-    struct DebrisGenerator : ISharedComponentData, System.IEquatable<DebrisGenerator>
+    struct DebrisGenerator : ISharedComponentData, IEquatable<DebrisGenerator>
     {
         public int BuildingCount;
         public int BuildingMaxHeight;
@@ -16,6 +14,8 @@ namespace DotsConversion
 
         public Mesh barMesh;
         public Material barMaterial;
+
+        public bool UseRenderMesh;
 
         public bool Equals(DebrisGenerator other)
         {
@@ -71,15 +71,13 @@ namespace DotsConversion.Authoring
         public Material barMaterial;
         public Mesh barMesh;
 
+        public bool useRenderMesh;
+
         public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
         {
             EntityArchetype pointArchetype = dstManager.CreateArchetype(
                 typeof(Point),
-                typeof(PointInitialize)
-//                typeof(DotsConversion.MeshRenderer),
-//                typeof(LocalToWorld),
-//                typeof(Translation)
-                );
+                typeof(PointInitialize));
 
             dstManager.AddSharedComponentData(entity, new DotsConversion.DebrisGenerator()
             {
@@ -88,16 +86,14 @@ namespace DotsConversion.Authoring
                 BuildingMaxHeight = buildingMaxHeight,
                 barMesh = barMesh,
                 AdditionalPointCount = additionalPointCount,
-                barMaterial = barMaterial
+                barMaterial = barMaterial,
+                UseRenderMesh = useRenderMesh
             });
 
             int maxPointCount = buildingCount * buildingMaxHeight * 3 + (additionalPointCount + 1);
 
             for (int i = 0; i < maxPointCount; i++)
-            {
-                var ent = dstManager.CreateEntity(pointArchetype);
-//                dstManager.SetSharedComponentData(ent, new DotsConversion.MeshRenderer() { mesh = mesh, material = material} );
-            }
+                dstManager.CreateEntity(pointArchetype);
         }
     }
 }

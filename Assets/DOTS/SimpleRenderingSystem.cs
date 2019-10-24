@@ -28,11 +28,12 @@ namespace DotsConversion
         {
             s_UniqueRenderersBuffer.Clear();
             EntityManager.GetAllUniqueSharedComponentData(s_UniqueRenderersBuffer);
+            
             for (int i = 0; i < s_UniqueRenderersBuffer.Count; ++i)
             {
                 var renderer = s_UniqueRenderersBuffer[i];
-                if (renderer.mesh == null 
-                    || renderer.material == null 
+                if (renderer.mesh == null
+                    || renderer.material == null
                     || !renderer.material.enableInstancing)
                     continue;
 

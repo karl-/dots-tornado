@@ -38,7 +38,7 @@ namespace DotsConversion.Authoring
         public Material material;
 
         public bool useRenderMesh = false;
-            
+
         public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
         {
             dstManager.AddComponentData(entity, new global::DotsConversion.TornadoParticleSettings
@@ -70,17 +70,15 @@ namespace DotsConversion.Authoring
                     UnityEngine.Random.Range(-radius, radius));
 
                 Entity entity = entityManager.CreateEntity(particleArchetype);
+                
                 entityManager.SetComponentData(entity, new TornadoParticle() { RadiusMultiplier = UnityEngine.Random.value });
                 entityManager.SetComponentData(entity, new Translation() { Value = position });
                 entityManager.SetComponentData(entity, new Scale() { Value = UnityEngine.Random.Range(size.x, size.y) });
+
                 if (useRenderMesh)
-                {
                     entityManager.SetSharedComponentData(entity, new RenderMesh() { mesh = mesh, material = material });
-                }
                 else
-                {
                     entityManager.SetSharedComponentData(entity, new MeshRenderer() { mesh = mesh, material = material });
-                }
             }
         }
     }

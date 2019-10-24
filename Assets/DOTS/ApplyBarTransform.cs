@@ -9,11 +9,7 @@ using UnityEngine;
 namespace DotsConversion
 {
 
-    [UpdateAfter(typeof(InitializePointsSystem))]
-
-    
-    //[UpdateAfter(typeof(BarBreakSystem))]
-
+    [UpdateAfter(typeof(InitializeBarSystem))]
     public sealed class ApplyBarTransform : JobComponentSystem
     {
         [BurstCompile]

@@ -21,7 +21,7 @@ namespace DotsConversion
 
             var entity = GetSingletonEntity<Tornado>();
             var position = EntityManager.GetComponentData<Translation>(entity).Value;
-            m_Camera.position = new Vector3(position.x, 10f, position.y) - m_Camera.forward * 60f;
+            m_Camera.position = new Vector3(position.x, 10f, position.z) - m_Camera.forward * 60f;
         }
     }
 }

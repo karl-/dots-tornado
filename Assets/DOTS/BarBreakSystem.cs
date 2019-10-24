@@ -1,4 +1,5 @@
-﻿using Unity.Collections;
+﻿using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -8,6 +9,7 @@ namespace DotsConversion
     [UpdateAfter(typeof(ApplyBarTornadoSwayToBarSystem))]
     public sealed class BarBreakSystem : JobComponentSystem
     {
+        [BurstCompile]
         struct CheckBreakageJob : IJob
         {
             [ReadOnly] public float BreakDistance;

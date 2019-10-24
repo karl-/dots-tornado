@@ -1,4 +1,5 @@
-﻿using Unity.Collections;
+﻿using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -10,6 +11,7 @@ namespace DotsConversion
     [UpdateAfter(typeof(InitializePointsSystem))]
     public sealed class ApplyBarTransform : JobComponentSystem
     {
+        [BurstCompile]
         struct ApplyTransformJob : IJobForEach<Bar, BarThickness, LocalToWorld>
         {
             [ReadOnly] public ComponentDataFromEntity<Point> _points;

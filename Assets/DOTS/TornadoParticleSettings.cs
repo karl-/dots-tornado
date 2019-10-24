@@ -4,6 +4,7 @@ using Unity.Mathematics;
 using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
+using Random = Unity.Mathematics.Random;
 
 namespace DotsConversion
 {
@@ -51,9 +52,9 @@ namespace DotsConversion.Authoring
             InstantiateParticles(dstManager, particleCount, radius, height, particleSizeRange);
         }
 
-        void InstantiateParticles(EntityManager manager, int count, float radius, float height, float2 size)
+        void InstantiateParticles(EntityManager entityManager, int count, float radius, float height, float2 size)
         {
-            EntityManager entityManager = World.Active.EntityManager;
+            Random random = new Random(32);
 
             EntityArchetype particleArchetype = entityManager.CreateArchetype(
                 typeof(TornadoParticle),
@@ -65,12 +66,12 @@ namespace DotsConversion.Authoring
             for (int i = 1; i < count; i++)
             {
                 var position = new float3(
-                    UnityEngine.Random.Range(-radius, radius),
-                    UnityEngine.Random.Range(0f, height),
-                    UnityEngine.Random.Range(-radius, radius));
+                    random.NextFloat(-radius, radius),
+                    random.NextFloat(0f, height),
+                    random.NextFloat(-radius, radius));
 
                 Entity entity = entityManager.CreateEntity(particleArchetype);
-                
+
                 entityManager.SetComponentData(entity, new TornadoParticle() { RadiusMultiplier = UnityEngine.Random.value });
                 entityManager.SetComponentData(entity, new Translation() { Value = position });
                 entityManager.SetComponentData(entity, new Scale() { Value = UnityEngine.Random.Range(size.x, size.y) });

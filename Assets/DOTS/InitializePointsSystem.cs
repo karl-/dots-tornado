@@ -4,7 +4,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 using static Unity.Mathematics.math;
-using UR = UnityEngine.Random;
+using Random = Unity.Mathematics.Random;
 
 public class InitializePointsSystem : ComponentSystem
 {
@@ -36,13 +36,14 @@ public class InitializePointsSystem : ComponentSystem
         EntityManager.GetAllUniqueSharedComponentData(settingsList);
         // why the actual data is stored in the second index is beyond me, but it works... so :)
         DebrisGenerator settings = settingsList[1];
+        Random random = new Random(42);
 
         // Initialize points
         for (int i = 0; i < settings.BuildingCount; i++)
         {
-            int buildingHeight = UR.Range(settings.BuildingMinHeight, settings.BuildingMaxHeight);
+            int buildingHeight = random.NextInt(settings.BuildingMinHeight, settings.BuildingMaxHeight);
             float spacing = 2f;
-            float3 pos = new float3(UR.Range(-45f, 45f), 0f, UR.Range(-45f, 45f));
+            float3 pos = new float3(random.NextFloat(-45f, 45f), 0f, random.NextFloat(-45f, 45f));
 
             for (int n = 0; n < buildingHeight; n++)
             {
@@ -59,10 +60,10 @@ public class InitializePointsSystem : ComponentSystem
 
         for (int i = 0; i < settings.AdditionalPointCount / 2; i++)
         {
-            float3 pos = new float3(UR.Range(-55f, 55f), 0f, UR.Range(-55f, 55f));
+            float3 pos = new float3(random.NextFloat(-55f, 55f), 0f, random.NextFloat(-55f, 55f));
 
-            var a = CreatePoint(pos + new float3(UR.Range(-.2f, -.1f), UR.Range(0f, 3f), UR.Range(.1f, .2f)), false);
-            var b = CreatePoint(float3(UR.Range(.2f, .1f), UR.Range(0f, .2f), UR.Range(-.1f, -.2f)), UR.value < .1f);
+            var a = CreatePoint(pos + new float3(random.NextFloat(-.2f, -.1f), random.NextFloat(0f, 3f), random.NextFloat(.1f, .2f)), false);
+            var b = CreatePoint(float3(random.NextFloat(.2f, .1f), random.NextFloat(0f, .2f), random.NextFloat(-.1f, -.2f)), random.NextFloat() < .1f);
 
             EntityManager.SetComponentData(pointEntities[index++], a);
             EntityManager.SetComponentData(pointEntities[index++], b);

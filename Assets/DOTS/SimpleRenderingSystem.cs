@@ -19,7 +19,7 @@ namespace DotsConversion
         EntityQuery m_MeshQuery;
 
         protected override void OnCreate()
-        { 
+        {
             m_MeshQuery = GetEntityQuery(typeof(MeshRenderer), typeof(LocalToWorld));
         }
 
@@ -27,14 +27,14 @@ namespace DotsConversion
         {
             s_UniqueRenderersBuffer.Clear();
             EntityManager.GetAllUniqueSharedComponentData(s_UniqueRenderersBuffer);
-            
-            for (int i = 0; i < s_UniqueRenderersBuffer.Count; ++i)
+
+            for (int i = 0, c = s_UniqueRenderersBuffer.Count; i < c; ++i)
             {
                 var renderer = s_UniqueRenderersBuffer[i];
-                if (renderer.mesh == null
-                    || renderer.material == null
-                    || !renderer.material.enableInstancing)
-                    continue;
+//                if (renderer.mesh == null
+//                    || renderer.material == null
+//                    || !renderer.material.enableInstancing)
+//                    continue;
 
                 m_MeshQuery.SetFilter(renderer);
                 var mats = m_MeshQuery.ToComponentDataArray<LocalToWorld>(Allocator.TempJob);

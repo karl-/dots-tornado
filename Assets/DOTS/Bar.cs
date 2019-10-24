@@ -21,7 +21,7 @@ namespace DotsConversion
 
 	public struct Bar : IComponentData
 	{
-		public Entity a, b;
+		public Entity a, b, backupA, backupB;
 		public float barLength;
 		public float extraDist;
 	}

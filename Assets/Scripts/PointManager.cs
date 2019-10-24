@@ -123,7 +123,7 @@ public class PointManager : MonoBehaviour {
 
 		// ground details
 		// In addition to the buildings, also generate 300 connected points
-		for (int i=0;i< additionalPoints; i++)
+		for (int i=0;i< additionalPoints; i+=2)
 		{
 			Vector3 pos = new Vector3(UnityEngine.Random.Range(-55f,55f),0f,UnityEngine.Random.Range(-55f,55f));
 			Point point = new Point();

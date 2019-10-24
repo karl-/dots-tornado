@@ -3,6 +3,7 @@ using Unity.Entities;
 using Unity.Rendering;
 using Unity.Transforms;
 using Unity.Mathematics;
+using UnityEngine.Rendering;
 
 namespace DotsConversion
 {
@@ -70,7 +71,7 @@ namespace DotsConversion
                         if (settings.UseRenderMesh)
                         {
                             EntityManager.SetSharedComponentData(barEntity,
-                                new RenderMesh() { mesh = settings.barMesh, material = settings.barMaterial });
+                                new RenderMesh() { mesh = settings.barMesh, material = settings.barMaterial/*, castShadows = ShadowCastingMode.On*/});
                         }
                         else
                         {

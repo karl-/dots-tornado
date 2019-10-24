@@ -4,6 +4,7 @@ using DotsConversion;
 using Unity.Entities;
 using UnityEngine;
 using Unity.Mathematics;
+using Unity.Rendering;
 using Unity.Transforms;
 using MeshRenderer = DotsConversion.MeshRenderer;
 using Random = UnityEngine.Random;
@@ -15,7 +16,7 @@ public class DotsPointGenerator : MonoBehaviour
 	Point[] points;
 	Bar[] bars;
 	public int pointCount;
-
+	public bool useRenderMesh = false;
     public float barBreakDistance;
 
 	Matrix4x4[][] matrices;
@@ -52,15 +53,22 @@ public class DotsPointGenerator : MonoBehaviour
 	{
 		var entityManager = World.Active.EntityManager;
 
-		ComponentType[] ct =
+		ComponentType[] ctMr =
 		{
 			typeof(DotsConversion.Bar),
 			typeof(DotsConversion.BarThickness),
 			typeof(LocalToWorld),
 			typeof(MeshRenderer)
 		};
+		ComponentType[] ctRm =
+		{
+			typeof(DotsConversion.Bar),
+			typeof(DotsConversion.BarThickness),
+			typeof(LocalToWorld),
+			typeof(RenderMesh)
+		};
 
-		var e = entityManager.CreateEntity(ct);
+		var e = entityManager.CreateEntity(useRenderMesh? ctRm : ctMr);
 		if (bar.point1.anchor || bar.point2.anchor)
 			entityManager.AddComponentData(e, new BarAnchor());
 		DotsConversion.Bar dotsBar = new DotsConversion.Bar();
@@ -75,7 +83,18 @@ public class DotsPointGenerator : MonoBehaviour
 
 		var lw = entityManager.GetComponentData<LocalToWorld>(e);
 		entityManager.SetComponentData(e, lw);
-		entityManager.SetSharedComponentData(e, new MeshRenderer() { mesh = barMesh, material = barMaterial });
+
+		if (useRenderMesh)
+		{
+			var rm = new RenderMesh();
+			rm.mesh = barMesh;
+			rm.material = barMaterial;
+			entityManager.SetSharedComponentData(e, rm);
+		}
+		else
+		{
+			entityManager.SetSharedComponentData(e, new MeshRenderer() { mesh = barMesh, material = barMaterial });
+		}
 	}
 
 	IEnumerator Generate()
@@ -90,8 +109,10 @@ public class DotsPointGenerator : MonoBehaviour
 		{
 			// In random positions along the X and Z axes
 			int height = UnityEngine.Random.Range(4, 12);
+			//int height = 2;
 			Vector3 pos = new Vector3(UnityEngine.Random.Range(-45f, 45f), 0f, UnityEngine.Random.Range(-45f, 45f));
 			float spacing = 2f;
+			//Vector3 pos = new Vector3(0, 0, 0);
 
 			// Buildings are between 4 and 12 blocks tall
 			for (int j = 0; j < height; j++)
@@ -219,8 +240,6 @@ public class DotsPointGenerator : MonoBehaviour
 
 		for (int i = 0; i < points.Length; i++)
 		{
-//			if (i % 100 == 0)
-//				Debug.Log("Calling CreatePointEntity for " + i);
 			if (points[i] != null)
 				CreatePointEntity(ref points[i]);
 		}
@@ -253,13 +272,6 @@ public class DotsPointGenerator : MonoBehaviour
 			CreateBarEntity(ref bars[i]);
 		}
 
-		Point fPoint = new Point();
-		fPoint.anchor = false;
-
-		for (int i = 0; i < bars.Length * 2; i++)
-		{
-			CreatePointEntity(ref fPoint, false);
-		}
 
 		System.GC.Collect();
 	}

@@ -12,8 +12,9 @@ namespace DotsConversion
     {
         protected override void OnUpdate()
         {
-            EntityQuery findPoints = GetEntityQuery(typeof(DotsConversion.Point), typeof(PointInitialize));
+            EntityQuery findPoints = GetEntityQuery(typeof(Point), typeof(PointInitialize));
             NativeArray<Entity> pointEntities = findPoints.ToEntityArray(Allocator.TempJob);
+            NativeArray<Point> pointData = findPoints.ToComponentDataArray<Point>(Allocator.TempJob);
 
             System.Collections.Generic.List<DebrisGenerator> settingsList = new System.Collections.Generic.List<DebrisGenerator>();
             EntityManager.GetAllUniqueSharedComponentData(settingsList);
@@ -33,11 +34,11 @@ namespace DotsConversion
             // Now go through the point list and connect adjacent points, forming "bars"
             for (int i = 0, c = pointEntities.Length; i < c; i++)
             {
-                var a = EntityManager.GetComponentData<Point>(pointEntities[i]);
+                var a = pointData[i];
 
                 for (int j = i + 1; j < c; j++)
                 {
-                    var b = EntityManager.GetComponentData<Point>(pointEntities[j]);
+                    var b = pointData[j];
 
                     float length = math.distance(a.position, b.position);
 
@@ -59,10 +60,10 @@ namespace DotsConversion
                         a.neighborCount++;
                         b.neighborCount++;
 
-                        EntityManager.SetComponentData(pointEntities[i], a);
-                        EntityManager.SetComponentData(pointEntities[j], b);
-
                         var barEntity = EntityManager.CreateEntity(barArchetype);
+
+                        pointData[i] = a;
+                        pointData[j] = b;
 
                         EntityManager.SetComponentData(barEntity, bar);
                         EntityManager.SetComponentData(barEntity, new BarThickness() { thickness = .4f });
@@ -84,14 +85,15 @@ namespace DotsConversion
 
             for (int i = 0; i < pointEntities.Length; i++)
             {
-                Point p = EntityManager.GetComponentData<Point>(pointEntities[i]);
-
+                Point p = pointData[i];
+                EntityManager.SetComponentData(pointEntities[i], p);
                 if(p.neighborCount < 1)
                     EntityManager.DestroyEntity(pointEntities[i]);
             }
 
             EntityManager.RemoveComponent<PointInitialize>(findPoints);
             pointEntities.Dispose();
+            pointData.Dispose();
         }
     }
 }

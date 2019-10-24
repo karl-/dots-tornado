@@ -1,9 +1,11 @@
+using System;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 
 namespace DotsConversion
 {
+	[Serializable]
 	public struct Point : IComponentData
 	{
 		public float3 position, previous;

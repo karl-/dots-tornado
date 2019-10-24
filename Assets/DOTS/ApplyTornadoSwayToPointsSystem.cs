@@ -12,12 +12,6 @@ using Random = Unity.Mathematics.Random;
 namespace DotsConversion
 {
     [Serializable]
-    struct TornadoSwayRandom : IComponentData
-    {
-        public Random Value;
-    }
-
-    [Serializable]
     struct TornadoSwayFader : IComponentData
     {
         public float Value;
@@ -28,9 +22,7 @@ namespace DotsConversion
         protected override void OnCreate()
         {
             base.OnCreate();
-            Entity random = World.Active.EntityManager.CreateEntity(typeof(TornadoSwayRandom));
             Entity fader = World.Active.EntityManager.CreateEntity(typeof(TornadoSwayFader));
-            EntityManager.SetComponentData(random, new TornadoSwayRandom() { Value = new Random(42) });
             EntityManager.SetComponentData(fader, new TornadoSwayFader() { Value = 0f });
         }
 
@@ -40,7 +32,6 @@ namespace DotsConversion
             public float TornadoFader;
             public float3 TornadoPosition;
             public float TimeValue;
-            public Random RandomValue;
 
             public float InvDamping;
             public float Friction;
@@ -75,7 +66,7 @@ namespace DotsConversion
                         float yFader = clamp(1f - point.position.y / TornadoHeight, 0, 1);
 
                         // apply greater force at the base of the tornado, tapering as we ascend the Y axis
-                        force *= TornadoFader * TornadoForce * (-.3f + RandomValue.NextFloat() * 1.6f);
+                        force *= TornadoFader * TornadoForce * (-.3f + TornadoUtility.Random(point.position) * 1.6f);
                         float forceY = TornadoUpForce;
                         point.previous.y -= forceY * force;
                         float forceX = -tdz + tdx * TornadoInwardForce * yFader;
@@ -106,7 +97,6 @@ namespace DotsConversion
 
         protected override JobHandle OnUpdate(JobHandle inputDependencies)
         {
-            var tornadoSwayRandom = GetSingleton<TornadoSwayRandom>();
             var tornadoSwayFader = GetSingleton<TornadoSwayFader>();
             tornadoSwayFader.Value = clamp(tornadoSwayFader.Value + Time.deltaTime / 10f, 0f, 1f);
 
@@ -121,7 +111,6 @@ namespace DotsConversion
                 var tornado = tornadoes[i];
                 var job = new ApplyTornadoSwayToPointsSystemJob();
 
-                job.RandomValue = tornadoSwayRandom.Value;
                 job.TornadoFader = tornadoSwayFader.Value;
                 job.TimeValue = Time.time;
                 job.TornadoPosition = positions[i].Value;
@@ -139,6 +128,8 @@ namespace DotsConversion
 
             tornadoes.Dispose();
             positions.Dispose();
+            
+            SetSingleton(tornadoSwayFader);
 
             return handle;
         }

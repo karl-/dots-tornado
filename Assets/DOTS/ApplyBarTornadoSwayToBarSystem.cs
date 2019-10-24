@@ -70,8 +70,8 @@ public class ApplyBarTornadoSwayToBarSystem : ComponentSystem
         _points[bar.a] = pA;
         _points[bar.b] = pB;
         bar.extraDist = extraDist;
-
     }
+
     protected override void OnCreate()
     {
         var query = new EntityQueryDesc
@@ -80,6 +80,7 @@ public class ApplyBarTornadoSwayToBarSystem : ComponentSystem
         };
         m_Group = GetEntityQuery(query);
     }
+    
     //[UpdateAfter(ApplyTornadoSwayToPointsSystem)]
     protected override void OnUpdate()
     {

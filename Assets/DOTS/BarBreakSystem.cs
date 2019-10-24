@@ -1,59 +1,87 @@
-﻿using Unity.Entities;
+﻿using Unity.Collections;
+using Unity.Entities;
+using Unity.Jobs;
 using Unity.Mathematics;
 
 namespace DotsConversion
 {
     [UpdateInGroup(typeof(LateSimulationSystemGroup))]
-    public sealed class BarBreakSystem : ComponentSystem
+    public sealed class BarBreakSystem : JobComponentSystem
     {
-        float m_BreakDistance;
-        EntityArchetype m_PointArchetype;
-        EntityQueryBuilder.F_D<Bar> m_CalculateBreak;
+        struct CheckBreakageJob : IJob
+        {
+            [ReadOnly] public float BreakDistance;
+            [NativeDisableParallelForRestriction] public ComponentDataFromEntity<Point> Points;
+            [NativeDisableParallelForRestriction] public ComponentDataFromEntity<Bar> Bars;
+            [ReadOnly] public NativeArray<Entity> BarEntities;
+
+            public void Execute()
+            {
+                for (int i = 0; i < BarEntities.Length; ++i)
+                {
+                    Entity entity = BarEntities[i];
+                    Bar bar = Bars[entity];
+                    if (bar.a == Entity.Null)
+                        continue;
+
+                    if (math.abs(bar.extraDist) > BreakDistance)
+                    {
+                        Point pointB = Points[bar.b];
+                        if (pointB.neighborCount > 1)
+                        {
+                            //Set old point
+                            pointB.neighborCount--;
+                            Points[bar.b] = pointB;
+
+                            bar.b = bar.backupB;
+
+                            //Set new point
+                            pointB.neighborCount = 1;
+                            Points[bar.b] = pointB;
+
+                            Bars[entity] = bar;
+                            continue;
+                        }
+
+                        Point pointA = Points[bar.a];
+                        if (pointA.neighborCount > 1)
+                        {
+                            //Set old point
+                            pointA.neighborCount--;
+                            Points[bar.a] = pointA;
+
+                            bar.a = bar.backupA;
+
+                            //Set new point
+                            pointA.neighborCount = 1;
+                            Points[bar.a] = pointA;
+
+                            Bars[entity] = bar;
+                        }
+                    }
+                }
+            }
+        }
+
+        EntityQuery m_BarQuery;
 
         protected override void OnCreate()
         {
-            m_PointArchetype = EntityManager.CreateArchetype(typeof(Point));
-            m_CalculateBreak = CalculateBreak;
+            m_BarQuery = GetEntityQuery(typeof(Bar));
         }
 
-        protected override void OnUpdate()
+        protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            m_BreakDistance = GetSingleton<BarSettings>().BreakDistance;
-            Entities.ForEach(m_CalculateBreak);
-        }
-
-        void CalculateBreak(ref Bar bar)
-        {
-            if (bar.a == Entity.Null)
-                return;
-
-            if (math.abs(bar.extraDist) > m_BreakDistance)
+            JobHandle entityQueryJob;
+            var job = new CheckBreakageJob
             {
-                Point pointB = EntityManager.GetComponentData<Point>(bar.b);
-                if (pointB.neighborCount > 1)
-                {
-                    pointB.neighborCount--;
-                    EntityManager.SetComponentData(bar.b, pointB);
-                    Entity newPoint = EntityManager.CreateEntity(m_PointArchetype);
-                    Point copyPointB = pointB;
-                    copyPointB.neighborCount = 1;
-                    EntityManager.SetComponentData(newPoint, copyPointB);
-                    bar.b = newPoint;
-                    return;
-                }
+                BreakDistance = GetSingleton<BarSettings>().BreakDistance,
+                Points = GetComponentDataFromEntity<Point>(),
+                Bars = GetComponentDataFromEntity<Bar>(),
+                BarEntities = m_BarQuery.ToEntityArray(Allocator.TempJob, out entityQueryJob),
+            };
 
-                Point pointA = EntityManager.GetComponentData<Point>(bar.a);
-                if (pointA.neighborCount > 1)
-                {
-                    pointA.neighborCount--;
-                    EntityManager.SetComponentData(bar.a, pointA);
-                    Entity newPoint = EntityManager.CreateEntity(m_PointArchetype);
-                    Point copyPointA = pointA;
-                    copyPointA.neighborCount = 1;
-                    EntityManager.SetComponentData(newPoint, copyPointA);
-                    bar.a = newPoint;
-                }
-            }
+            return job.Schedule(JobHandle.CombineDependencies(inputDeps, entityQueryJob));
         }
     }
 }

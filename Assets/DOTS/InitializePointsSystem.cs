@@ -2,6 +2,7 @@
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
 using static Unity.Mathematics.math;
@@ -9,6 +10,7 @@ using UR = UnityEngine.Random;
 
 public class InitializePointsSystem : ComponentSystem
 {
+    public bool useRenderMesh = true;
     static DotsConversion.Point CreatePoint(float3 position, bool anchor)
     {
         return new DotsConversion.Point()
@@ -79,7 +81,7 @@ public class InitializePointsSystem : ComponentSystem
             typeof(DotsConversion.Bar),
             typeof(DotsConversion.BarThickness),
             typeof(LocalToWorld),
-            typeof(DotsConversion.MeshRenderer));
+            useRenderMesh? typeof(RenderMesh) : typeof(DotsConversion.MeshRenderer));
 
         // Now go through the point list and connect adjacent points, forming "bars"
         int barIndex = 0;
@@ -111,7 +113,18 @@ public class InitializePointsSystem : ComponentSystem
                     EntityManager.SetComponentData(barEntity, bar);
                     EntityManager.SetComponentData(barEntity, new BarThickness() { thickness = .4f });
                     EntityManager.SetComponentData(barEntity, new LocalToWorld());
-                    EntityManager.SetSharedComponentData(barEntity, new DotsConversion.MeshRenderer() { mesh = settings.barMesh, material = settings.barMaterial });
+                    if (useRenderMesh)
+                    {
+                        EntityManager.SetSharedComponentData(barEntity, 
+                            new RenderMesh() { mesh = settings.barMesh, material = settings.barMaterial });
+                        
+                    }
+                    else
+                    {
+                        EntityManager.SetSharedComponentData(barEntity, 
+                            new DotsConversion.MeshRenderer() { mesh = settings.barMesh, material = settings.barMaterial });
+                    }
+                    
                 }
             }
         }

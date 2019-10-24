@@ -1,5 +1,4 @@
 using System;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 
@@ -12,11 +11,6 @@ namespace DotsConversion
 		public bool active;
 		public int neighborCount;
 		public bool anchor;
-	}
-
-	public struct FreePointQueue
-	{
-		public NativeQueue<Entity> points;
 	}
 
 	public struct Bar : IComponentData

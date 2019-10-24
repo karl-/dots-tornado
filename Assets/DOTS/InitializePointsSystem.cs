@@ -10,7 +10,6 @@ using UR = UnityEngine.Random;
 
 public class InitializePointsSystem : ComponentSystem
 {
-    public bool useRenderMesh = true;
     static DotsConversion.Point CreatePoint(float3 position, bool anchor)
     {
         return new DotsConversion.Point()
@@ -53,11 +52,8 @@ public class InitializePointsSystem : ComponentSystem
                 DotsConversion.Point a = CreatePoint(new float3(pos.x + spacing, n * spacing, pos.z - spacing), n == 0);
                 DotsConversion.Point b = CreatePoint(new float3(pos.x - spacing, n * spacing, pos.z - spacing), n == 0);
                 DotsConversion.Point c = CreatePoint(new float3(pos.x + 0f, n * spacing, pos.z + spacing), n == 0);
-//                EntityManager.SetComponentData(pointEntities[index], new Translation() { Value = a.position });
                 EntityManager.SetComponentData(pointEntities[index++], a);
-//                EntityManager.SetComponentData(pointEntities[index], new Translation() { Value = b.position });
                 EntityManager.SetComponentData(pointEntities[index++], b);
-//                EntityManager.SetComponentData(pointEntities[index], new Translation() { Value = c.position });
                 EntityManager.SetComponentData(pointEntities[index++], c);
             }
         }
@@ -65,76 +61,14 @@ public class InitializePointsSystem : ComponentSystem
         for (int i = 0; i < settings.AdditionalPointCount / 2; i++)
         {
             float3 pos = new float3(UR.Range(-55f, 55f), 0f, UR.Range(-55f, 55f));
+
             var a = CreatePoint(pos + new float3(UR.Range(-.2f, -.1f), UR.Range(0f, 3f), UR.Range(.1f, .2f)), false);
             var b = CreatePoint(float3(UR.Range(.2f, .1f), UR.Range(0f, .2f), UR.Range(-.1f, -.2f)), UR.value < .1f);
 
-//            EntityManager.SetComponentData(pointEntities[index], new Translation() { Value = a.position });
             EntityManager.SetComponentData(pointEntities[index++], a);
-//            EntityManager.SetComponentData(pointEntities[index], new Translation() { Value = b.position });
             EntityManager.SetComponentData(pointEntities[index++], b);
         }
 
-        EntityQuery findBars = GetEntityQuery(typeof(DotsConversion.Bar), typeof(BarInitialize));
-        NativeArray<Entity> barEntities = findBars.ToEntityArray(Allocator.TempJob);
-
-        EntityArchetype barArchetype = EntityManager.CreateArchetype(
-            typeof(DotsConversion.Bar),
-            typeof(DotsConversion.BarThickness),
-            typeof(LocalToWorld),
-            useRenderMesh? typeof(RenderMesh) : typeof(DotsConversion.MeshRenderer));
-
-        // Now go through the point list and connect adjacent points, forming "bars"
-        int barIndex = 0;
-        for (int i = 0; i < index; i++)
-        {
-            for (int j = i + 1; j < index; j++)
-            {
-                // for each point, create a connection to any point between .2f and 5f radius of self
-                DotsConversion.Bar bar = new DotsConversion.Bar();
-                var a = EntityManager.GetComponentData<DotsConversion.Point>(pointEntities[i]);
-                var b = EntityManager.GetComponentData<DotsConversion.Point>(pointEntities[j]);
-                bar.barLength = distance(a.position, b.position);
-
-                if (bar.barLength < 5f && bar.barLength > .2f)
-                {
-                    bar.a = pointEntities[i];
-                    bar.b = pointEntities[j];
-
-                    a.active = true;
-                    b.active = true;
-
-                    a.neighborCount++;
-                    b.neighborCount++;
-
-                    EntityManager.SetComponentData(pointEntities[i], a);
-                    EntityManager.SetComponentData(pointEntities[j], b);
-
-                    var barEntity = EntityManager.CreateEntity(barArchetype);
-                    EntityManager.SetComponentData(barEntity, bar);
-                    EntityManager.SetComponentData(barEntity, new BarThickness() { thickness = .4f });
-                    EntityManager.SetComponentData(barEntity, new LocalToWorld());
-                    if (useRenderMesh)
-                    {
-                        EntityManager.SetSharedComponentData(barEntity, 
-                            new RenderMesh() { mesh = settings.barMesh, material = settings.barMaterial });
-                        
-                    }
-                    else
-                    {
-                        EntityManager.SetSharedComponentData(barEntity, 
-                            new DotsConversion.MeshRenderer() { mesh = settings.barMesh, material = settings.barMaterial });
-                    }
-                    
-                }
-            }
-        }
-
-        for(int i = barIndex; i < barEntities.Length; i++)
-            EntityManager.DestroyEntity(barEntities[i]);
-
-        EntityManager.RemoveComponent<PointInitialize>(findPoints);
-
-        barEntities.Dispose();
         pointEntities.Dispose();
     }
 }

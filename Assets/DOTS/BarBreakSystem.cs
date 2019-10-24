@@ -6,7 +6,6 @@ namespace DotsConversion
     public sealed class BarBreakSystem : ComponentSystem
     {
         float m_BreakDistance;
-        ComponentDataFromEntity<Point> m_Points;
         EntityArchetype m_PointArchetype;
         EntityQueryBuilder.F_D<Bar> m_CalculateBreak;
 
@@ -19,7 +18,6 @@ namespace DotsConversion
         protected override void OnUpdate()
         {
             m_BreakDistance = GetSingleton<BarSettings>().BreakDistance;
-            m_Points = GetComponentDataFromEntity<Point>();
             Entities.ForEach(m_CalculateBreak);
         }
 
@@ -30,11 +28,11 @@ namespace DotsConversion
 
             if (math.abs(bar.extraDist) > m_BreakDistance)
             {
-                Point pointB = m_Points[bar.b];
+                Point pointB = EntityManager.GetComponentData<Point>(bar.b);
                 if (pointB.neighborCount > 1)
                 {
                     pointB.neighborCount--;
-                    m_Points[bar.b] = pointB;
+                    EntityManager.SetComponentData(bar.b, pointB);
                     Entity newPoint = EntityManager.CreateEntity(m_PointArchetype);
                     Point copyPointB = pointB;
                     copyPointB.neighborCount = 1;
@@ -43,11 +41,11 @@ namespace DotsConversion
                     return;
                 }
 
-                Point pointA = m_Points[bar.a];
+                Point pointA = EntityManager.GetComponentData<Point>(bar.a);
                 if (pointA.neighborCount > 1)
                 {
                     pointA.neighborCount--;
-                    m_Points[bar.a] = pointA;
+                    EntityManager.SetComponentData(bar.a, pointA);
                     Entity newPoint = EntityManager.CreateEntity(m_PointArchetype);
                     Point copyPointA = pointA;
                     copyPointA.neighborCount = 1;

@@ -419,15 +419,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f401cba7a7fab48ec8d354f0dc26c6fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  buildingCount: 35
-  buildingMinHeight: 4
+  buildingCount: 150
+  buildingMinHeight: 12
   buildingMaxHeight: 12
-  additionalPointCount: 600
-  mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
-  material: {fileID: 2100000, guid: 0b41184bd9ec5d34facaae17b8fa8aba, type: 2}
+  additionalPointCount: 1200
   barMaterial: {fileID: 2100000, guid: 4012e1b21a491ab44899652bc98c3d02, type: 2}
   barMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
-  useRenderMesh: 1
+  useRenderMesh: 0
 --- !u!4 &1919291512
 Transform:
   m_ObjectHideFlags: 0
@@ -493,7 +491,7 @@ MonoBehaviour:
   particleSizeRange: {x: 0.2, y: 0.7}
   mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   material: {fileID: 2100000, guid: d8350e13b3cd00d4bb07415d3bb10c67, type: 2}
-  useRenderMesh: 1
+  useRenderMesh: 0
 --- !u!4 &1961881162
 Transform:
   m_ObjectHideFlags: 0

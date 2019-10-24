@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
@@ -28,7 +27,7 @@ namespace DotsConversion
         {
             s_UniqueRenderersBuffer.Clear();
             EntityManager.GetAllUniqueSharedComponentData(s_UniqueRenderersBuffer);
-
+            
             for (int i = 0; i < s_UniqueRenderersBuffer.Count; ++i)
             {
                 var renderer = s_UniqueRenderersBuffer[i];
@@ -41,13 +40,7 @@ namespace DotsConversion
                 var mats = m_MeshQuery.ToComponentDataArray<LocalToWorld>(Allocator.TempJob);
                 for (int j = 0; j < mats.Length; j += k_ChunkLimit)
                 {
-                    int inMatsIndex = j;
-                    
-                    for (int k = 0; k < k_ChunkLimit && inMatsIndex< mats.Length; ++k)
-                    {
-                        m_ChunkBuffer[k] = mats[inMatsIndex++].Value;
-                    }
-
+                    CopyToArray(mats, j, math.min(mats.Length - j, k_ChunkLimit), m_ChunkBuffer);
                     Graphics.DrawMeshInstanced(renderer.mesh, 0, renderer.material, m_ChunkBuffer);
                 }
 
@@ -55,5 +48,9 @@ namespace DotsConversion
             }
         }
 
+        static void CopyToArray(NativeArray<LocalToWorld> localToWorlds, int index, int count, Matrix4x4[] matrices)
+        {
+            NativeArray<Matrix4x4>.Copy(localToWorlds.GetSubArray(index, count).Reinterpret<Matrix4x4>(), matrices, count);
+        }
     }
 }

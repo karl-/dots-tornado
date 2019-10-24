@@ -23,8 +23,6 @@ namespace DotsConversion
                 {
                     Entity entity = BarEntities[i];
                     Bar bar = Bars[entity];
-                    if (bar.a == Entity.Null)
-                        continue;
 
                     if (math.abs(bar.extraDist) > BreakDistance)
                     {

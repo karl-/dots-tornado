@@ -29,68 +29,68 @@ namespace DotsConversion
         [BurstCompile]
         struct ApplyTornadoSwayToPointsSystemJob : IJobForEach<Point>
         {
-            public float TornadoFader;
-            public float3 TornadoPosition;
-            public float TimeValue;
+            [ReadOnly] public float TornadoFader;
+            [ReadOnly] public float3 TornadoPosition;
+            [ReadOnly] public float TimeValue;
 
-            public float InvDamping;
-            public float Friction;
-            public float TornadoForce;
-            public float TornadoUpForce;
-            public float TornadoInwardForce;
-            public float TornadoMaxForceDist;
-            public float TornadoHeight;
+            [ReadOnly] public float InvDamping;
+            [ReadOnly] public float Friction;
+            [ReadOnly] public float TornadoForce;
+            [ReadOnly] public float TornadoUpForce;
+            [ReadOnly] public float TornadoInwardForce;
+            [ReadOnly] public float TornadoMaxForceDist;
+            [ReadOnly] public float TornadoHeight;
 
             public void Execute(ref Point point)
             {
+                if (point.anchor)
+                    return;
+
                 // Anchor is a point that forms the ground triangle of a building
-                if (point.anchor == false)
+                float startX = point.position.x;
+                float startY = point.position.y;
+                float startZ = point.position.z;
+
+                point.previous.y += .01f;
+
+                // Calculate the tornado force on this point
+                float tdx = TornadoPosition.x + TornadoUtility.ApplySway(point.position.y, TimeValue) - point.position.x;
+                float tdz = TornadoPosition.z - point.position.z;
+                float tornadoDist = sqrt(tdx * tdx + tdz * tdz);
+                tdx /= tornadoDist;
+                tdz /= tornadoDist;
+
+                // If the point is within max force distance of the tornado, apply force to this point
+                if (tornadoDist < TornadoMaxForceDist)
                 {
-                    float startX = point.position.x;
-                    float startY = point.position.y;
-                    float startZ = point.position.z;
+                    float force = (1f - tornadoDist / TornadoMaxForceDist);
+                    float yFader = clamp(1f - point.position.y / TornadoHeight, 0, 1);
 
-                    point.previous.y += .01f;
+                    // apply greater force at the base of the tornado, tapering as we ascend the Y axis
+                    force *= TornadoFader * TornadoForce * (-.3f + TornadoUtility.Random(point.position) * 1.6f);
+                    float forceY = TornadoUpForce;
+                    point.previous.y -= forceY * force;
+                    float forceX = -tdz + tdx * TornadoInwardForce * yFader;
+                    float forceZ = tdx + tdz * TornadoInwardForce * yFader;
+                    point.previous.x -= forceX * force;
+                    point.previous.z -= forceZ * force;
+                }
 
-                    // Calculate the tornado force on this point
-                    float tdx = TornadoPosition.x + TornadoUtility.ApplySway(point.position.y, TimeValue) - point.position.x;
-                    float tdz = TornadoPosition.z - point.position.z;
-                    float tornadoDist = sqrt(tdx * tdx + tdz * tdz);
-                    tdx /= tornadoDist;
-                    tdz /= tornadoDist;
+                // dampen the effect of the tornado force (if applied)
+                point.position.x += (point.position.x - point.previous.x) * InvDamping;
+                point.position.y += (point.position.y - point.previous.y) * InvDamping;
+                point.position.z += (point.position.z - point.previous.z) * InvDamping;
 
-                    // If the point is within max force distance of the tornado, apply force to this point
-                    if (tornadoDist < TornadoMaxForceDist)
-                    {
-                        float force = (1f - tornadoDist / TornadoMaxForceDist);
-                        float yFader = clamp(1f - point.position.y / TornadoHeight, 0, 1);
+                point.previous.x = startX;
+                point.previous.y = startY;
+                point.previous.z = startZ;
 
-                        // apply greater force at the base of the tornado, tapering as we ascend the Y axis
-                        force *= TornadoFader * TornadoForce * (-.3f + TornadoUtility.Random(point.position) * 1.6f);
-                        float forceY = TornadoUpForce;
-                        point.previous.y -= forceY * force;
-                        float forceX = -tdz + tdx * TornadoInwardForce * yFader;
-                        float forceZ = tdx + tdz * TornadoInwardForce * yFader;
-                        point.previous.x -= forceX * force;
-                        point.previous.z -= forceZ * force;
-                    }
-
-                    // dampen the effect of the tornado force (if applied)
-                    point.position.x += (point.position.x - point.previous.x) * InvDamping;
-                    point.position.y += (point.position.y - point.previous.y) * InvDamping;
-                    point.position.z += (point.position.z - point.previous.z) * InvDamping;
-
-                    point.previous.x = startX;
-                    point.previous.y = startY;
-                    point.previous.z = startZ;
-
-                    if (point.position.y < 0f)
-                    {
-                        point.position.y = 0f;
-                        point.previous.y = -point.previous.y;
-                        point.previous.x += (point.position.x - point.previous.x) * Friction;
-                        point.previous.z += (point.position.z - point.previous.z) * Friction;
-                    }
+                if (point.position.y < 0f)
+                {
+                    point.position.y = 0f;
+                    point.previous.y = -point.previous.y;
+                    point.previous.x += (point.position.x - point.previous.x) * Friction;
+                    point.previous.z += (point.position.z - point.previous.z) * Friction;
                 }
             }
         }
@@ -104,19 +104,19 @@ namespace DotsConversion
 
             tornadoSwayFader.Value = clamp(tornadoSwayFader.Value + Time.deltaTime / 10f, 0f, 1f);
 
-                var job = new ApplyTornadoSwayToPointsSystemJob();
+            var job = new ApplyTornadoSwayToPointsSystemJob();
 
-                job.TornadoFader = tornadoSwayFader.Value;
-                job.TimeValue = Time.time;
+            job.TornadoFader = tornadoSwayFader.Value;
+            job.TimeValue = Time.time;
             job.TornadoPosition = translation.Value;
 
-                job.InvDamping = tornado.InvDamping;
-                job.Friction = tornado.Friction;
-                job.TornadoForce = tornado.TornadoForce;
-                job.TornadoUpForce = tornado.TornadoUpForce;
-                job.TornadoInwardForce = tornado.TornadoInwardForce;
-                job.TornadoMaxForceDist = tornado.TornadoMaxForceDist;
-                job.TornadoHeight = tornado.TornadoHeight;
+            job.InvDamping = tornado.InvDamping;
+            job.Friction = tornado.Friction;
+            job.TornadoForce = tornado.TornadoForce;
+            job.TornadoUpForce = tornado.TornadoUpForce;
+            job.TornadoInwardForce = tornado.TornadoInwardForce;
+            job.TornadoMaxForceDist = tornado.TornadoMaxForceDist;
+            job.TornadoHeight = tornado.TornadoHeight;
 
             SetSingleton(tornadoSwayFader);
 

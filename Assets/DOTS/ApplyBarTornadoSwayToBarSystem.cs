@@ -22,8 +22,6 @@ namespace DotsConversion
                 for (int i = 0; i < Bars.Length; ++i)
                 {
                     var bar = Bars[i];
-                    if (bar.a == Entity.Null)
-                        return;
 
                     Point pA = Points[bar.a];
                     var pB = Points[bar.b];
@@ -39,8 +37,9 @@ namespace DotsConversion
                     float pushX = (dx / dist * extraDist) * .5f;
                     float pushY = (dy / dist * extraDist) * .5f;
                     float pushZ = (dz / dist * extraDist) * .5f;
+
                     // Debug.Log( "Push " + pushX + " " + pushY + " " + pushZ );
-                    if (Points[bar.a].anchor == false && Points[bar.b].anchor == false)
+                    if (pA.anchor == false && pB.anchor == false)
                     {
                         pointA.x += pushX;
                         pointA.y += pushY;
@@ -96,7 +95,7 @@ namespace DotsConversion
 
             inputDeps = JobHandle.CombineDependencies(inputDeps, barQueryHandle);
             inputDeps = JobHandle.CombineDependencies(inputDeps, entityQueryHandle);
-            
+
             return swayJob.Schedule(inputDeps);
         }
     }

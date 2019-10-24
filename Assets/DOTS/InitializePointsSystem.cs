@@ -2,8 +2,6 @@
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Rendering;
-using Unity.Transforms;
 using UnityEngine;
 using static Unity.Mathematics.math;
 using UR = UnityEngine.Random;
@@ -52,6 +50,7 @@ public class InitializePointsSystem : ComponentSystem
                 DotsConversion.Point a = CreatePoint(new float3(pos.x + spacing, n * spacing, pos.z - spacing), n == 0);
                 DotsConversion.Point b = CreatePoint(new float3(pos.x - spacing, n * spacing, pos.z - spacing), n == 0);
                 DotsConversion.Point c = CreatePoint(new float3(pos.x + 0f, n * spacing, pos.z + spacing), n == 0);
+
                 EntityManager.SetComponentData(pointEntities[index++], a);
                 EntityManager.SetComponentData(pointEntities[index++], b);
                 EntityManager.SetComponentData(pointEntities[index++], c);

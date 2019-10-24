@@ -39,7 +39,6 @@ public class DotsPointGenerator : MonoBehaviour
 
 		var e = entityManager.CreateEntity(ct);
 		var dPt = new DotsConversion.Point();
-		dPt.active = active;
 		dPt.anchor = point.anchor;
 		dPt.position = new float3(point.x, point.y, point.z);
 		dPt.previous = new float3(dPt.position);

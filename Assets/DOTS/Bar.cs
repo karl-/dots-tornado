@@ -8,7 +8,6 @@ namespace DotsConversion
 	public struct Point : IComponentData
 	{
 		public float3 position, previous;
-		public bool active;
 		public int neighborCount;
 		public bool anchor;
 	}

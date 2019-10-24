@@ -13,8 +13,6 @@ namespace DotsConversion
         {
             EntityQuery findPoints = GetEntityQuery(typeof(DotsConversion.Point), typeof(PointInitialize));
             NativeArray<Entity> pointEntities = findPoints.ToEntityArray(Allocator.TempJob);
-            EntityQuery findBars = GetEntityQuery(typeof(DotsConversion.Bar), typeof(BarInitialize));
-            NativeArray<Entity> barEntities = findBars.ToEntityArray(Allocator.TempJob);
 
             System.Collections.Generic.List<DebrisGenerator> settingsList = new System.Collections.Generic.List<DebrisGenerator>();
             EntityManager.GetAllUniqueSharedComponentData(settingsList);
@@ -22,8 +20,8 @@ namespace DotsConversion
             DebrisGenerator settings = settingsList[1];
 
             EntityArchetype barArchetype = EntityManager.CreateArchetype(
-                typeof(DotsConversion.Bar),
-                typeof(DotsConversion.BarThickness),
+                typeof(Bar),
+                typeof(BarThickness),
                 typeof(LocalToWorld),
                 settings.UseRenderMesh ? typeof(RenderMesh) : typeof(DotsConversion.MeshRenderer));
 
@@ -32,7 +30,6 @@ namespace DotsConversion
                 typeof(PointInitialize));
 
             // Now go through the point list and connect adjacent points, forming "bars"
-            int barIndex = 0;
             for (int i = 0, c = pointEntities.Length; i < c; i++)
             {
                 var a = EntityManager.GetComponentData<Point>(pointEntities[i]);
@@ -58,9 +55,6 @@ namespace DotsConversion
                         bar.a = pointEntities[i];
                         bar.b = pointEntities[j];
 
-                        a.active = true;
-                        b.active = true;
-
                         a.neighborCount++;
                         b.neighborCount++;
 
@@ -68,6 +62,7 @@ namespace DotsConversion
                         EntityManager.SetComponentData(pointEntities[j], b);
 
                         var barEntity = EntityManager.CreateEntity(barArchetype);
+
                         EntityManager.SetComponentData(barEntity, bar);
                         EntityManager.SetComponentData(barEntity, new BarThickness() { thickness = .4f });
                         EntityManager.SetComponentData(barEntity, new LocalToWorld());
@@ -86,19 +81,15 @@ namespace DotsConversion
                 }
             }
 
-            for (int i = barIndex; i < barEntities.Length; i++)
-                EntityManager.DestroyEntity(barEntities[i]);
-
             for (int i = 0; i < pointEntities.Length; i++)
             {
                 Point p = EntityManager.GetComponentData<Point>(pointEntities[i]);
+
                 if(p.neighborCount < 1)
                     EntityManager.DestroyEntity(pointEntities[i]);
             }
 
             EntityManager.RemoveComponent<PointInitialize>(findPoints);
-
-            barEntities.Dispose();
             pointEntities.Dispose();
         }
     }

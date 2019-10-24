@@ -65,9 +65,6 @@ namespace DotsConversion.Authoring
         public int buildingMaxHeight = 12;
         public int additionalPointCount = 300;
 
-        public Mesh mesh;
-        public Material material;
-
         public Material barMaterial;
         public Mesh barMesh;
 

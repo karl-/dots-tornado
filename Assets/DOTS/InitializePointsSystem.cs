@@ -10,7 +10,7 @@ using UR = UnityEngine.Random;
 
 public class InitializePointsSystem : ComponentSystem
 {
-    public bool useRenderMesh = false;
+    public bool useRenderMesh = true;
     static DotsConversion.Point CreatePoint(float3 position, bool anchor)
     {
         return new DotsConversion.Point()

@@ -24,7 +24,12 @@ public class PointManager : MonoBehaviour {
 	public float tornadoUpForce;
 	public float tornadoInwardForce;
 
-	Point[] points;
+    [Header("Generation")]
+    public int buildingCount = 35;
+    public int buildingHeight = 12;
+    public int additionalPoints = 600;
+
+    Point[] points;
 	Bar[] bars;
 	public int pointCount;
 
@@ -63,7 +68,7 @@ public class PointManager : MonoBehaviour {
 		matricesList.Add(new List<Matrix4x4>());
 
 		// Create 35 buildings
-		for (int i = 0; i < 35; i++)
+		for (int i = 0; i < buildingCount; i++)
 		{
 			// In random positions along the X and Z axes
 			int height = UnityEngine.Random.Range(4, 12);
@@ -71,7 +76,7 @@ public class PointManager : MonoBehaviour {
 			float spacing = 2f;
 
 			// Buildings are between 4 and 12 blocks tall
-			for (int j = 0; j < height; j++)
+			for (int j = 0; j < buildingHeight; j++)
 			{
 				// Buildings are composed of sets of 3 points forming a triangle. The first floor is marked as the ancho.
 				// The anchor is used to
@@ -118,7 +123,7 @@ public class PointManager : MonoBehaviour {
 
 		// ground details
 		// In addition to the buildings, also generate 300 connected points
-		for (int i=0;i<600;i++)
+		for (int i=0;i< additionalPoints; i++)
 		{
 			Vector3 pos = new Vector3(UnityEngine.Random.Range(-55f,55f),0f,UnityEngine.Random.Range(-55f,55f));
 			Point point = new Point();

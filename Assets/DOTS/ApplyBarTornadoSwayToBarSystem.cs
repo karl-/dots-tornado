@@ -13,7 +13,9 @@ namespace DotsConversion
         struct ApplySwayJob : IJob
         {
             [NativeDisableParallelForRestriction] public ComponentDataFromEntity<Point> Points;
-            public NativeArray<Bar> Bars;
+            [NativeDisableParallelForRestriction, WriteOnly] public ComponentDataFromEntity<Bar> BarsMap;
+            [ReadOnly, DeallocateOnJobCompletion] public NativeArray<Entity> BarEntities;
+            [ReadOnly, DeallocateOnJobCompletion] public NativeArray<Bar> Bars;
 
             public void Execute()
             {
@@ -66,22 +68,7 @@ namespace DotsConversion
                     Points[bar.a] = pA;
                     Points[bar.b] = pB;
                     bar.extraDist = extraDist;
-                    Bars[i] = bar;
-                }
-            }
-        }
-
-        struct ApplyBarData : IJob
-        {
-            [ReadOnly, DeallocateOnJobCompletion] public NativeArray<Entity> BarEntities;
-            [ReadOnly, DeallocateOnJobCompletion] public NativeArray<Bar> Bars;
-            public EntityCommandBuffer CommandBuffer;
-
-            public void Execute()
-            {
-                for (int i = 0; i < BarEntities.Length; ++i)
-                {
-                    CommandBuffer.SetComponent(BarEntities[i], Bars[i]);
+                    BarsMap[BarEntities[i]] = bar;
                 }
             }
         }
@@ -96,24 +83,21 @@ namespace DotsConversion
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             JobHandle barQueryHandle;
+            JobHandle entityQueryHandle;
+
             var bars = m_BarsQuery.ToComponentDataArray<Bar>(Allocator.TempJob, out barQueryHandle);
             var swayJob = new ApplySwayJob
             {
                 Bars = bars,
                 Points = GetComponentDataFromEntity<Point>(),
-            };
-
-            inputDeps = swayJob.Schedule(JobHandle.CombineDependencies(inputDeps, barQueryHandle));
-
-            JobHandle entityQueryHandle;
-            var applyJob = new ApplyBarData
-            {
-                Bars = bars,
+                BarsMap = GetComponentDataFromEntity<Bar>(),
                 BarEntities = m_BarsQuery.ToEntityArray(Allocator.TempJob, out entityQueryHandle),
-                CommandBuffer = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>().CreateCommandBuffer(),
             };
 
-            return applyJob.Schedule(JobHandle.CombineDependencies(inputDeps, entityQueryHandle));
+            inputDeps = JobHandle.CombineDependencies(inputDeps, barQueryHandle);
+            inputDeps = JobHandle.CombineDependencies(inputDeps, entityQueryHandle);
+            
+            return swayJob.Schedule(inputDeps);
         }
     }
 }

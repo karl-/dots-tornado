@@ -54,9 +54,9 @@ public class ApplyBarTornadoSwayToBarSystem : ComponentSystem
         }
         else if (_points[bar.a].anchor)
         {
-            pointB.x += pushX * 2f;
-            pointB.y += pushY * 2f;
-            pointB.z += pushZ * 2f;
+            pointB.x -= pushX * 2f;
+            pointB.y -= pushY * 2f;
+            pointB.z -= pushZ * 2f;
         }
         else if (_points[bar.b].anchor)
         {

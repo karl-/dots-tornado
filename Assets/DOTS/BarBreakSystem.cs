@@ -5,7 +5,7 @@ using Unity.Mathematics;
 
 namespace DotsConversion
 {
-    [UpdateInGroup(typeof(LateSimulationSystemGroup))]
+    [UpdateAfter(typeof(ApplyBarTornadoSwayToBarSystem))]
     public sealed class BarBreakSystem : JobComponentSystem
     {
         struct CheckBreakageJob : IJob
@@ -13,7 +13,7 @@ namespace DotsConversion
             [ReadOnly] public float BreakDistance;
             [NativeDisableParallelForRestriction] public ComponentDataFromEntity<Point> Points;
             [NativeDisableParallelForRestriction] public ComponentDataFromEntity<Bar> Bars;
-            [ReadOnly] public NativeArray<Entity> BarEntities;
+            [ReadOnly, DeallocateOnJobCompletion] public NativeArray<Entity> BarEntities;
 
             public void Execute()
             {

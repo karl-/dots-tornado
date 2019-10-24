@@ -98,22 +98,17 @@ namespace DotsConversion
         protected override JobHandle OnUpdate(JobHandle inputDependencies)
         {
             var tornadoSwayFader = GetSingleton<TornadoSwayFader>();
+            Entity tornadoEntity = GetSingletonEntity<Tornado>();
+            Tornado tornado = EntityManager.GetComponentData<Tornado>(tornadoEntity);
+            Translation translation = EntityManager.GetComponentData<Translation>(tornadoEntity);
+
             tornadoSwayFader.Value = clamp(tornadoSwayFader.Value + Time.deltaTime / 10f, 0f, 1f);
 
-            EntityQuery tornadoQuery = GetEntityQuery(typeof(Tornado), typeof(Translation));
-            NativeArray<Tornado> tornadoes = tornadoQuery.ToComponentDataArray<Tornado>(Allocator.TempJob);
-            NativeArray<Translation> positions = tornadoQuery.ToComponentDataArray<Translation>(Allocator.TempJob);
-            int tornadoCount = positions.Length;
-            JobHandle handle = inputDependencies;
-
-            for (int i = 0; i < tornadoCount; i++)
-            {
-                var tornado = tornadoes[i];
                 var job = new ApplyTornadoSwayToPointsSystemJob();
 
                 job.TornadoFader = tornadoSwayFader.Value;
                 job.TimeValue = Time.time;
-                job.TornadoPosition = positions[i].Value;
+            job.TornadoPosition = translation.Value;
 
                 job.InvDamping = tornado.InvDamping;
                 job.Friction = tornado.Friction;
@@ -123,15 +118,9 @@ namespace DotsConversion
                 job.TornadoMaxForceDist = tornado.TornadoMaxForceDist;
                 job.TornadoHeight = tornado.TornadoHeight;
 
-                handle = job.Schedule(this, handle);
-            }
-
-            tornadoes.Dispose();
-            positions.Dispose();
-            
             SetSingleton(tornadoSwayFader);
 
-            return handle;
+            return job.Schedule(this, inputDependencies);
         }
     }
 }

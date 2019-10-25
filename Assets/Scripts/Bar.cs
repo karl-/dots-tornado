@@ -40,6 +40,6 @@ public class Bar {
 		maxZ = Mathf.Max(point1.z,point2.z);
 
 		float upDot = Mathf.Acos(Mathf.Abs(Vector3.Dot(Vector3.up,delta.normalized)))/Mathf.PI;
-		color = Color.white * upDot*Random.Range(.7f,1f);
+		color = Color.white * upDot * Random.Range(.7f,1f);
 	}
 }

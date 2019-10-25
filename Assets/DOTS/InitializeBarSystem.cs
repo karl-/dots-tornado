@@ -24,11 +24,14 @@ namespace DotsConversion
                 typeof(Bar),
                 typeof(BarThickness),
                 typeof(LocalToWorld),
-                typeof(DotsConversion.MeshRenderer));
+                typeof(MeshRenderer),
+                typeof(ColorData));
 
             EntityArchetype pointArchetype = EntityManager.CreateArchetype(
                 typeof(Point),
                 typeof(PointInitialize));
+
+            Random random = new Random(32);
 
             // Now go through the point list and connect adjacent points, forming "bars"
             for (int i = 0, c = pointEntities.Length; i < c; i++)
@@ -67,7 +70,8 @@ namespace DotsConversion
                         EntityManager.SetComponentData(barEntity, bar);
                         EntityManager.SetComponentData(barEntity, new BarThickness() { thickness = .4f });
                         EntityManager.SetComponentData(barEntity, new LocalToWorld());
-                        
+                        float upDot = math.acos(math.abs(math.dot(new float3(0,1,0), math.normalize(b.position - a.position))))/math.PI;
+                        EntityManager.SetComponentData(barEntity, new ColorData() { Value = new float4(upDot * random.NextFloat(.7f, 1f)) } );
                         EntityManager.SetSharedComponentData(barEntity,
                             new MeshRenderer() { mesh = settings.barMesh, material = settings.barMaterial });
                     }

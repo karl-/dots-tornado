@@ -19,10 +19,13 @@ namespace DotsConversion
 		public float extraDist;
 	}
 
+	public struct ColorData : IComponentData
+	{
+		public float4 Value;
+	}
+
 	public struct BarThickness : IComponentData
 	{
 		public float thickness;
 	}
-
-	public struct BarAnchor : IComponentData { }
 }

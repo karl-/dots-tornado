@@ -60,7 +60,8 @@ namespace DotsConversion.Authoring
                 typeof(Translation),
                 typeof(Scale),
                 typeof(MeshRenderer),
-                typeof(LocalToWorld));
+                typeof(LocalToWorld),
+                typeof(ColorData));
 
             for (int i = 1; i < count; i++)
             {
@@ -74,7 +75,8 @@ namespace DotsConversion.Authoring
                 entityManager.SetComponentData(entity, new TornadoParticle() { RadiusMultiplier = UnityEngine.Random.value });
                 entityManager.SetComponentData(entity, new Translation() { Value = position });
                 entityManager.SetComponentData(entity, new Scale() { Value = UnityEngine.Random.Range(size.x, size.y) });
-                
+                entityManager.SetComponentData(entity, new ColorData() { Value = new float4(1f) * random.NextFloat(.2f, .7f) } );
+
                 entityManager.SetSharedComponentData(entity, new MeshRenderer() { mesh = mesh, material = material });
             }
         }

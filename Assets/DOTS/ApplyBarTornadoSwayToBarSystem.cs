@@ -6,7 +6,8 @@ using Unity.Mathematics;
 
 namespace DotsConversion
 {
-    [UpdateAfter(typeof(ApplyTornadoSwayToPointsSystem))]
+    //[UpdateAfter(typeof(ApplyTornadoSwayToPointsSystem))]
+    [UpdateInGroup(typeof(LateSimulationSystemGroup))]
     public class ApplyBarTornadoSwayToBarSystem : JobComponentSystem
     {
         [BurstCompile]

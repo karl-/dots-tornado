@@ -4,7 +4,6 @@ using DotsConversion;
 using Unity.Entities;
 using UnityEngine;
 using Unity.Mathematics;
-using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine.Rendering;
 using Random = UnityEngine.Random;

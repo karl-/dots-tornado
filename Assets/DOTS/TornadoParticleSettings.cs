@@ -1,7 +1,6 @@
 ﻿using System;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
 using Random = Unity.Mathematics.Random;
@@ -60,7 +59,7 @@ namespace DotsConversion.Authoring
                 typeof(TornadoParticle),
                 typeof(Translation),
                 typeof(Scale),
-                useRenderMesh ? typeof(RenderMesh) : typeof(MeshRenderer),
+                typeof(MeshRenderer),
                 typeof(LocalToWorld));
 
             for (int i = 1; i < count; i++)
@@ -75,11 +74,8 @@ namespace DotsConversion.Authoring
                 entityManager.SetComponentData(entity, new TornadoParticle() { RadiusMultiplier = UnityEngine.Random.value });
                 entityManager.SetComponentData(entity, new Translation() { Value = position });
                 entityManager.SetComponentData(entity, new Scale() { Value = UnityEngine.Random.Range(size.x, size.y) });
-
-                if (useRenderMesh)
-                    entityManager.SetSharedComponentData(entity, new RenderMesh() { mesh = mesh, material = material });
-                else
-                    entityManager.SetSharedComponentData(entity, new MeshRenderer() { mesh = mesh, material = material });
+                
+                entityManager.SetSharedComponentData(entity, new MeshRenderer() { mesh = mesh, material = material });
             }
         }
     }

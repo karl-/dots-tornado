@@ -4,7 +4,6 @@ using DotsConversion;
 using Unity.Entities;
 using UnityEngine;
 using Unity.Mathematics;
-using Unity.Rendering;
 using Unity.Transforms;
 using MeshRenderer = DotsConversion.MeshRenderer;
 using Random = UnityEngine.Random;
@@ -16,7 +15,6 @@ public class DotsPointGenerator : MonoBehaviour
 	Point[] points;
 	Bar[] bars;
 	public int pointCount;
-	public bool useRenderMesh = false;
     public float barBreakDistance;
 
 	Matrix4x4[][] matrices;
@@ -59,15 +57,8 @@ public class DotsPointGenerator : MonoBehaviour
 			typeof(LocalToWorld),
 			typeof(MeshRenderer)
 		};
-		ComponentType[] ctRm =
-		{
-			typeof(DotsConversion.Bar),
-			typeof(DotsConversion.BarThickness),
-			typeof(LocalToWorld),
-			typeof(RenderMesh)
-		};
 
-		var e = entityManager.CreateEntity(useRenderMesh? ctRm : ctMr);
+		var e = entityManager.CreateEntity(ctMr);
 		if (bar.point1.anchor || bar.point2.anchor)
 			entityManager.AddComponentData(e, new BarAnchor());
 		DotsConversion.Bar dotsBar = new DotsConversion.Bar();
@@ -82,18 +73,8 @@ public class DotsPointGenerator : MonoBehaviour
 
 		var lw = entityManager.GetComponentData<LocalToWorld>(e);
 		entityManager.SetComponentData(e, lw);
-
-		if (useRenderMesh)
-		{
-			var rm = new RenderMesh();
-			rm.mesh = barMesh;
-			rm.material = barMaterial;
-			entityManager.SetSharedComponentData(e, rm);
-		}
-		else
-		{
-			entityManager.SetSharedComponentData(e, new MeshRenderer() { mesh = barMesh, material = barMaterial });
-		}
+        
+		entityManager.SetSharedComponentData(e, new MeshRenderer() { mesh = barMesh, material = barMaterial });
 	}
 
 	IEnumerator Generate()

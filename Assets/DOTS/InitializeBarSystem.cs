@@ -1,6 +1,5 @@
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Rendering;
 using Unity.Transforms;
 using Unity.Mathematics;
 using UnityEngine.Rendering;
@@ -25,7 +24,7 @@ namespace DotsConversion
                 typeof(Bar),
                 typeof(BarThickness),
                 typeof(LocalToWorld),
-                settings.UseRenderMesh ? typeof(RenderMesh) : typeof(DotsConversion.MeshRenderer));
+                typeof(DotsConversion.MeshRenderer));
 
             EntityArchetype pointArchetype = EntityManager.CreateArchetype(
                 typeof(Point),
@@ -68,17 +67,9 @@ namespace DotsConversion
                         EntityManager.SetComponentData(barEntity, bar);
                         EntityManager.SetComponentData(barEntity, new BarThickness() { thickness = .4f });
                         EntityManager.SetComponentData(barEntity, new LocalToWorld());
-
-                        if (settings.UseRenderMesh)
-                        {
-                            EntityManager.SetSharedComponentData(barEntity,
-                                new RenderMesh() { mesh = settings.barMesh, material = settings.barMaterial/*, castShadows = ShadowCastingMode.On*/});
-                        }
-                        else
-                        {
-                            EntityManager.SetSharedComponentData(barEntity,
-                                new MeshRenderer() { mesh = settings.barMesh, material = settings.barMaterial });
-                        }
+                        
+                        EntityManager.SetSharedComponentData(barEntity,
+                            new MeshRenderer() { mesh = settings.barMesh, material = settings.barMaterial });
                     }
                 }
             }
